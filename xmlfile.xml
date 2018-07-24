@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE NumberInfo>
+<NumberInfo version="1.0">
+  <Number value="1">
+    <Name>One</Name>
+    <Roman>I</Roman>
+  </Number>
+  <Number value="2">
+    <Name>Two</Name>
+    <Roman>II</Roman>
+  </Number>
+  <Number value="3">
+    <Name>Three</Name>
+    <Roman>III</Roman>
+  </Number>  
+</NumberInfo>  
