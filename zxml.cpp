@@ -219,7 +219,7 @@ bool ZXml::changeSave(QIODevice *device)
 {
     QTextStream ts(device);
     ts.reset();
-    ts.setCodec("utf-8");
+   // ts.setCodec("utf-8");
     m_doc.save(ts, 4);
     return true;
 }
@@ -228,4 +228,9 @@ QDomElement ZXml::xmlCreateNode(QString tagName)
 {
     return m_doc.createElement(tagName);
 }
+QDomAttr ZXml::xmlCreateAttribute(QString name)
+{
+    return  m_doc.createAttribute(name);
+}
+
 

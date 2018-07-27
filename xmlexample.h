@@ -20,6 +20,8 @@ typedef struct Menu_Wnd{
     QTreeWidgetItem *item;
     struct Menu_Wnd *parent;
     struct Menu_Wnd *firstChild;
+    struct Menu_Wnd *lbroher;
+    struct Menu_Wnd *rbroher;
     bool isMainFrame;
 }XMenu_Wnd;
 
@@ -36,6 +38,7 @@ typedef struct CopyNode{
     bool isText;
     bool isDisplay;
     bool isAdvanced;
+    QString Name;
     XPostoin position;
     XText   text;
     XNavigation navigation;
@@ -57,16 +60,18 @@ public:
   void GetWndList(QString frame, QDomNode node);
   void GetGWnd(QDomNode node);
   void showWndlist();
+  Menu_Wnd * getlbrother(Menu_Wnd *curwnd, Menu_Wnd *prewnd);
   Menu_Wnd * getMenu_node(QTreeWidgetItem * item);
   void showWndAttr(Menu_Wnd *wnd);
   Menu_Wnd *getParentWnd(QString parenName, Menu_Wnd *prevWnd);
   void setWndAttr(Menu_Wnd *wnd);
   void cloneWndAttr(Menu_Wnd *wnd, CNode cnode);
   void copyWndAttr(Menu_Wnd *wnd);
-  void add_xmlnode(CopyNode cnode);
+  Menu_Wnd * add_xmlnode(Menu_Wnd *wnd, Menu_Wnd *copywnd, CopyNode *pcnode, ADD_NODE_TYPE type = ADD_NEW_BEFORE);
   void showtips(QString tips);
   bool copyFileToPath(QString sourceDir ,QString toDir, bool coverFileIfExist);
-
+  QDomElement getChildNode(QDomElement node, QString childName);
+  void removeChild(Menu_Wnd *wnd);
 
 private slots:
     void on_ptn_read_clicked();
@@ -83,6 +88,16 @@ private slots:
     void on_ptn_copy_clicked();
 
     void on_ptn_pase_attr_clicked();
+
+    void on_ptn_insert_clicked();
+
+    void on_ptn_moveup_clicked();
+
+    void on_ptn_movedowm_clicked();
+
+    void on_ptn_movedowm_2_clicked();
+
+    void on_ptn_delete_clicked();
 
 private:
   Ui::xmlExample *ui;

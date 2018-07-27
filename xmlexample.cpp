@@ -24,12 +24,13 @@ void xmlExample::initCopyNode()
     m_CopyNode.isAdvanced = false;
     m_CopyNode.isText = false;
     m_CopyNode.isDisplay = false;
+    m_CopyNode.Name = "";
 }
 
 void xmlExample::on_ptn_read_clicked()
 {
     filepath = QFileDialog::getOpenFileName(this,QString::fromLocal8Bit("Choose xml"),
-                                                    "./",tr("*.xml"));
+                                           "./",tr("*.xml"));
     if(filepath != NULL)
     {
         copyFileToPath(filepath, BACK_UP_FILE, true);
@@ -56,7 +57,7 @@ void xmlExample::on_ptn_write_clicked()
     {
         QFile file(WORK_FILE);
 
-        if (!file.open(QFile::WriteOnly)) {
+        if (!file.open(QFile::WriteOnly | QFile::Truncate)) {
           qDebug() << "Cannot open file";
           return;
         }
@@ -114,6 +115,18 @@ Menu_Wnd *xmlExample::getParentWnd(QString parenName, Menu_Wnd *prevWnd)
         return getParentWnd(parenName, prevWnd->parent);
     }
 }
+Menu_Wnd * xmlExample::getlbrother(Menu_Wnd *curwnd, Menu_Wnd *prewnd)
+{
+    if(curwnd->parent == prewnd)
+    {
+      return curwnd;
+    }
+    else if(curwnd->parent == prewnd->parent)
+    {
+        return prewnd;
+    }
+    return getlbrother(curwnd, prewnd->parent);
+}
 
 void xmlExample::GetWndList(QString frame, QDomNode node)
 {
@@ -135,7 +148,10 @@ void xmlExample::GetWndList(QString frame, QDomNode node)
                     wnd = new Menu_Wnd();
                     wnd->node = node2;
                     wnd->parent = wnd;
+                    wnd->lbroher = wnd;
+                    wnd->rbroher = wnd;
                     wnd->frame = frame;
+                    wnd->firstChild = wnd;
                     wnd->isMainFrame = true;
                     menuWndList.append(wnd);
                 }else
@@ -145,6 +161,17 @@ void xmlExample::GetWndList(QString frame, QDomNode node)
                     wnd2->parent = getParentWnd(parentName, wnd);
                     wnd2->isMainFrame = false;
                     wnd2->frame = frame;
+                    wnd2->lbroher = getlbrother(wnd2, wnd);
+                    if(wnd2->parent == wnd)
+                    {
+                        wnd->firstChild = wnd2;
+                    }
+                    if(wnd2->parent == wnd->parent)
+                    {
+                        wnd->rbroher = wnd2;
+                    }
+                    wnd2->rbroher = wnd2;
+                    wnd2->firstChild = wnd2;
                     menuWndList.append(wnd2);
                     wnd = wnd2;
                 }
@@ -380,10 +407,22 @@ void  xmlExample::cloneWndAttr(Menu_Wnd *wnd, CNode cnode)
 
            if(e.tagName () == "Position" && (m_CopyNode.type == CALL || m_CopyNode.isDisplay))
            {
-                e.toElement().setAttribute("X", cnode.position.X);
-                e.toElement().setAttribute("Y", cnode.position.Y);
-                e.toElement().setAttribute("Width",cnode.position.Width);
-                e.toElement().setAttribute("Height", cnode.position.Height);
+               if(cnode.position.X != "")
+               {
+                    e.toElement().setAttribute("X", cnode.position.X);
+               }
+               if(cnode.position.Y != "")
+               {
+                    e.toElement().setAttribute("Y", cnode.position.Y);
+               }
+               if(cnode.position.Height != "")
+               {
+                    e.toElement().setAttribute("Width",cnode.position.Width);
+               }
+               if(cnode.position.Height != "")
+               {
+                    e.toElement().setAttribute("Height", cnode.position.Height);
+               }
            }
            if(e.tagName () == "Text"&& (m_CopyNode.type == CALL || m_CopyNode.isText))
            {
@@ -486,6 +525,9 @@ void xmlExample::on_ptn_copy_clicked()
         if(ui->cb_all->isChecked())
         {
            m_CopyNode.type = CALL;
+           m_CopyNode.isAdvanced = true;
+           m_CopyNode.isText = true;
+           m_CopyNode.isDisplay = true;
         }else
         {
             m_CopyNode.type = CSOME;
@@ -503,7 +545,28 @@ void xmlExample::on_ptn_copy_clicked()
             }
         }
         m_CopyNode.node = wnd->node;
+        m_CopyNode.Name = ui->le_name->text();
         copyWndAttr(wnd);
+        if(m_CopyNode.isDisplay)
+        {
+            if(ui->le_XPos->text() == "")
+            {
+                 m_CopyNode.position.X = "";
+            }
+            if(ui->le_YPos->text() == "")
+            {
+                 m_CopyNode.position.Y = "";
+            }
+            if(ui->le_Width->text() == "")
+            {
+                 m_CopyNode.position.Width = "";
+            }
+            if(ui->le_Height->text() == "")
+            {
+                 m_CopyNode.position.Height = "";
+            }
+
+        }
     }
 }
 
@@ -527,15 +590,564 @@ void xmlExample::on_ptn_pase_attr_clicked()
    }
     showWndAttr(curwnd);
 }
-
-void xmlExample::add_xmlnode(CopyNode cnode)
+QDomElement xmlExample::getChildNode(QDomElement node, QString childName)
 {
-    QTreeWidgetItem * currentItem = ui->menu_tree->currentItem();
-    Menu_Wnd *curwnd = getMenu_node(currentItem);
-    QDomElement newNode = xmlContents.xmlCreateNode(cnode.node.toElement().tagName());
-   // QDomAttr attr_id = doc.createAttribute(tr("id"));
-    //curwnd->node.insertBefore();
-    curwnd->node.appendChild(newNode);
+    QDomNode n=node .firstChild();
+
+    while (!n.isNull ())
+    {
+       if (n.isElement ())
+       {
+           QDomElement e = n.toElement ();
+
+           if(e.tagName () == childName )
+           {
+               return e;
+           }
+       }
+       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
+    }
+    return node;
+}
+
+Menu_Wnd * xmlExample::add_xmlnode(Menu_Wnd *wnd, Menu_Wnd *copywnd, CopyNode *pcnode, ADD_NODE_TYPE type)
+{
+    QDomElement cureNode = copywnd->node.toElement();
+    QDomElement insertNode = wnd->node.toElement();
+    QDomElement newNode = xmlContents.xmlCreateNode("Wnd");
+    QDomElement childNode, tempNode;
+    QDomAttr attr_CtrlTypeName = xmlContents.xmlCreateAttribute(tr("CtrlTypeName"));
+    QDomAttr attr_Name = xmlContents.xmlCreateAttribute(tr("Name"));
+    QDomAttr attr_ParentName = xmlContents.xmlCreateAttribute(tr("ParentName"));
+    QDomAttr attr_Lock = xmlContents.xmlCreateAttribute(tr("Lock"));
+    attr_CtrlTypeName.setValue(cureNode.attribute("CtrlTypeName"));
+
+    if(pcnode == NULL || pcnode->Name == "")
+    {
+        attr_Name.setValue(cureNode.attribute("Name"));
+    }else
+    {
+        attr_Name.setValue(wnd->parent->node.toElement().attribute("Name")+pcnode->Name);
+    }
+
+    attr_ParentName.setValue(cureNode.attribute("ParentName"));
+    attr_Lock.setValue(cureNode.attribute("Lock"));
+    newNode.setAttributeNode(attr_CtrlTypeName);
+    newNode.setAttributeNode(attr_Name);
+    newNode.setAttributeNode(attr_ParentName);
+    newNode.setAttributeNode(attr_Lock);
+//----------------------
+    QDomElement element_Position = xmlContents.xmlCreateNode("Position");
+
+    QDomAttr attr_X = xmlContents.xmlCreateAttribute(tr("X"));
+    QDomAttr attr_Y = xmlContents.xmlCreateAttribute(tr("Y"));
+    QDomAttr attr_Width = xmlContents.xmlCreateAttribute(tr("Width"));
+    QDomAttr attr_Height = xmlContents.xmlCreateAttribute(tr("Height"));
+
+    if(pcnode != NULL && pcnode->isDisplay)
+    {
+        childNode = getChildNode(pcnode->node.toElement(), "Position");
+        tempNode = getChildNode(cureNode, "Position");
+    }else
+    {
+        childNode = getChildNode(cureNode, "Position");
+    }
+
+    attr_X.setValue(childNode.attribute("X"));
+    if(pcnode != NULL && pcnode->isDisplay)
+    {
+        attr_Y.setValue(tempNode.attribute("Y"));
+    }else
+    {
+        attr_Y.setValue(childNode.attribute("Y"));
+    }
+
+    attr_Width.setValue(childNode.attribute("Width"));
+    attr_Height.setValue(childNode.attribute("Height"));
+
+    element_Position.setAttributeNode(attr_X);
+    element_Position.setAttributeNode(attr_Y);
+    element_Position.setAttributeNode(attr_Width);
+    element_Position.setAttributeNode(attr_Height);
+//-----------------
+    QDomElement element_State = xmlContents.xmlCreateNode("State");
+
+    QDomAttr attr_Focusable = xmlContents.xmlCreateAttribute(tr("Focusable"));
+    QDomAttr attr_Disabled = xmlContents.xmlCreateAttribute(tr("Disabled"));
+    QDomAttr attr_Visible = xmlContents.xmlCreateAttribute(tr("Visible"));
+    QDomAttr attr_SrcAlphaReplaceDstAlpha = xmlContents.xmlCreateAttribute(tr("SrcAlphaReplaceDstAlpha"));
+
+    childNode = getChildNode(cureNode, "State");
+
+    attr_Focusable.setValue(childNode.attribute("Focusable"));
+    attr_Disabled.setValue(childNode.attribute("Disabled"));
+    attr_Visible.setValue(childNode.attribute("Visible"));
+    attr_SrcAlphaReplaceDstAlpha.setValue(childNode.attribute("SrcAlphaReplaceDstAlpha"));
+
+    element_State.setAttributeNode(attr_Focusable);
+    element_State.setAttributeNode(attr_Disabled);
+    element_State.setAttributeNode(attr_Visible);
+    element_State.setAttributeNode(attr_SrcAlphaReplaceDstAlpha);
+//-------------------
+    QDomElement element_Text = xmlContents.xmlCreateNode("Text");
+
+    QDomAttr attr_HasFocusText = xmlContents.xmlCreateAttribute(tr("HasFocusText"));
+    QDomAttr attr_TextDistance = xmlContents.xmlCreateAttribute(tr("TextDistance"));
+    QDomAttr attr_FocusTextColor = xmlContents.xmlCreateAttribute(tr("FocusTextColor"));
+    QDomAttr attr_FocusFontTypeIndex = xmlContents.xmlCreateAttribute(tr("FocusFontTypeIndex"));
+    QDomAttr attr_DisableTextColor = xmlContents.xmlCreateAttribute(tr("DisableTextColor"));
+    QDomAttr attr_HasNormalText = xmlContents.xmlCreateAttribute(tr("HasNormalText"));
+    QDomAttr attr_TextID = xmlContents.xmlCreateAttribute(tr("TextID"));
+    QDomAttr attr_NormalTextColor = xmlContents.xmlCreateAttribute(tr("NormalTextColor"));
+    QDomAttr attr_FontTypeIndex = xmlContents.xmlCreateAttribute(tr("FontTypeIndex"));
+    QDomAttr attr_HasDisableText = xmlContents.xmlCreateAttribute(tr("HasDisableText"));
+    QDomAttr attr_TextAlign = xmlContents.xmlCreateAttribute(tr("TextAlign"));
+    QDomAttr attr_DisableFontTypeIndex = xmlContents.xmlCreateAttribute(tr("DisableFontTypeIndex"));
+
+    if(pcnode != NULL && pcnode->isText)
+    {
+        childNode = getChildNode(pcnode->node.toElement(), "Text");
+    }else
+    {
+        childNode = getChildNode(cureNode, "Text");
+    }
+
+    attr_HasFocusText.setValue(childNode.attribute("HasFocusText"));
+    attr_TextDistance.setValue(childNode.attribute("TextDistance"));
+    attr_FocusTextColor.setValue(childNode.attribute("FocusTextColor"));
+    attr_FocusFontTypeIndex.setValue(childNode.attribute("FocusFontTypeIndex"));
+    attr_DisableTextColor.setValue(childNode.attribute("DisableTextColor"));
+    attr_HasNormalText.setValue(childNode.attribute("HasNormalText"));
+    attr_TextID.setValue(childNode.attribute("TextID"));
+    attr_NormalTextColor.setValue(childNode.attribute("NormalTextColor"));
+    attr_FontTypeIndex.setValue(childNode.attribute("FontTypeIndex"));
+    attr_HasDisableText.setValue(childNode.attribute("HasDisableText"));
+    attr_TextAlign.setValue(childNode.attribute("TextAlign"));
+    attr_DisableFontTypeIndex.setValue(childNode.attribute("DisableFontTypeIndex"));
+
+    element_Text.setAttributeNode(attr_HasFocusText);
+    element_Text.setAttributeNode(attr_TextDistance);
+    element_Text.setAttributeNode(attr_FocusTextColor);
+    element_Text.setAttributeNode(attr_FocusFontTypeIndex);
+    element_Text.setAttributeNode(attr_DisableTextColor);
+    element_Text.setAttributeNode(attr_HasNormalText);
+    element_Text.setAttributeNode(attr_TextID);
+    element_Text.setAttributeNode(attr_NormalTextColor);
+    element_Text.setAttributeNode(attr_FontTypeIndex);
+    element_Text.setAttributeNode(attr_HasDisableText);
+    element_Text.setAttributeNode(attr_TextAlign);
+    element_Text.setAttributeNode(attr_DisableFontTypeIndex);
+
+///-------------------
+    QDomElement element_Frame = xmlContents.xmlCreateNode("Frame");
+
+    QDomAttr attr_NormalFrame = xmlContents.xmlCreateAttribute(tr("NormalFrame"));
+    QDomAttr attr_FocusFrame = xmlContents.xmlCreateAttribute(tr("FocusFrame"));
+    QDomAttr attr_DisableFrame = xmlContents.xmlCreateAttribute(tr("DisableFrame"));
+    QDomAttr attr_NormalFrameTopLeftColor = xmlContents.xmlCreateAttribute(tr("NormalFrameTopLeftColor"));
+    QDomAttr attr_NormalFrameBottomRightColor = xmlContents.xmlCreateAttribute(tr("NormalFrameBottomRightColor"));
+    QDomAttr attr_FocusFrameTopLeftColor = xmlContents.xmlCreateAttribute(tr("FocusFrameTopLeftColor"));
+    QDomAttr attr_FocusFrameBottomRightColor = xmlContents.xmlCreateAttribute(tr("FocusFrameBottomRightColor"));
+    QDomAttr attr_DisableFrameTopLeftColor = xmlContents.xmlCreateAttribute(tr("DisableFrameTopLeftColor"));
+    QDomAttr attr_DisableFrameBottomRightColor = xmlContents.xmlCreateAttribute(tr("DisableFrameBottomRightColor"));
+
+
+    childNode = getChildNode(cureNode, "Frame");
+
+    attr_NormalFrame.setValue(childNode.attribute("NormalFrame"));
+    attr_FocusFrame.setValue(childNode.attribute("FocusFrame"));
+    attr_DisableFrame.setValue(childNode.attribute("DisableFrame"));
+    attr_NormalFrameTopLeftColor.setValue(childNode.attribute("NormalFrameTopLeftColor"));
+    attr_NormalFrameBottomRightColor.setValue(childNode.attribute("NormalFrameBottomRightColor"));
+    attr_FocusFrameTopLeftColor.setValue(childNode.attribute("FocusFrameTopLeftColor"));
+    attr_FocusFrameBottomRightColor.setValue(childNode.attribute("FocusFrameBottomRightColor"));
+    attr_DisableFrameTopLeftColor.setValue(childNode.attribute("DisableFrameTopLeftColor"));
+    attr_DisableFrameBottomRightColor.setValue(childNode.attribute("DisableFrameBottomRightColor"));
+
+    element_Frame.setAttributeNode(attr_NormalFrame);
+    element_Frame.setAttributeNode(attr_FocusFrame);
+    element_Frame.setAttributeNode(attr_DisableFrame);
+    element_Frame.setAttributeNode(attr_NormalFrameTopLeftColor);
+    element_Frame.setAttributeNode(attr_NormalFrameBottomRightColor);
+    element_Frame.setAttributeNode(attr_FocusFrameTopLeftColor);
+    element_Frame.setAttributeNode(attr_FocusFrameBottomRightColor);
+    element_Frame.setAttributeNode(attr_DisableFrameTopLeftColor);
+    element_Frame.setAttributeNode(attr_DisableFrameBottomRightColor);
+
+//------------------
+    QDomElement element_Border = xmlContents.xmlCreateNode("Border");
+
+    QDomAttr attr_NormalBorderSize = xmlContents.xmlCreateAttribute(tr("NormalBorderSize"));
+    QDomAttr attr_FocusBorderSize = xmlContents.xmlCreateAttribute(tr("FocusBorderSize"));
+    QDomAttr attr_DisableBorderSize = xmlContents.xmlCreateAttribute(tr("DisableBorderSize"));
+
+    childNode = getChildNode(cureNode, "Border");
+
+    attr_NormalBorderSize.setValue(childNode.attribute("NormalBorderSize"));
+    attr_FocusBorderSize.setValue(childNode.attribute("FocusBorderSize"));
+    attr_DisableBorderSize.setValue(childNode.attribute("DisableBorderSize"));
+
+    element_Border.setAttributeNode(attr_NormalBorderSize);
+    element_Border.setAttributeNode(attr_FocusBorderSize);
+    element_Border.setAttributeNode(attr_DisableBorderSize);
+//----------
+    QDomElement element_Alpha = xmlContents.xmlCreateNode("Alpha");
+
+    QDomAttr attr_NormalAlpha = xmlContents.xmlCreateAttribute(tr("NormalAlpha"));
+    QDomAttr attr_FocusAlpha = xmlContents.xmlCreateAttribute(tr("FocusAlpha"));
+    QDomAttr attr_DisableAlpha = xmlContents.xmlCreateAttribute(tr("DisableAlpha"));
+
+    childNode = getChildNode(cureNode, "Alpha");
+
+    attr_NormalAlpha.setValue(childNode.attribute("NormalAlpha"));
+    attr_FocusAlpha.setValue(childNode.attribute("FocusAlpha"));
+    attr_DisableAlpha.setValue(childNode.attribute("DisableAlpha"));
+
+    element_Alpha.setAttributeNode(attr_NormalAlpha);
+    element_Alpha.setAttributeNode(attr_FocusAlpha);
+    element_Alpha.setAttributeNode(attr_DisableAlpha);
+
+//---------------------------
+    QDomElement element_Effect = xmlContents.xmlCreateNode("Effect");
+
+    QDomAttr attr_TransEffIn = xmlContents.xmlCreateAttribute(tr("TransEffIn"));
+    QDomAttr attr_TransEffOut = xmlContents.xmlCreateAttribute(tr("TransEffOut"));
+
+    childNode = getChildNode(cureNode, "Effect");
+
+    attr_TransEffIn.setValue(childNode.attribute("TransEffIn"));
+    attr_TransEffOut.setValue(childNode.attribute("TransEffOut"));
+
+    element_Effect.setAttributeNode(attr_TransEffIn);
+    element_Effect.setAttributeNode(attr_TransEffOut);
+ //-------------------
+    QDomElement element_Navigation = xmlContents.xmlCreateNode("Navigation");
+
+    QDomAttr attr_Up = xmlContents.xmlCreateAttribute(tr("Up"));
+    QDomAttr attr_Down = xmlContents.xmlCreateAttribute(tr("Down"));
+    QDomAttr attr_Left = xmlContents.xmlCreateAttribute(tr("Left"));
+    QDomAttr attr_Right = xmlContents.xmlCreateAttribute(tr("Right"));
+
+    childNode = getChildNode(cureNode, "Navigation");
+
+    attr_Up.setValue(newNode.attribute("Name"));
+    attr_Down.setValue(newNode.attribute("Name"));
+    attr_Left.setValue(newNode.attribute("Name"));
+    attr_Right.setValue(newNode.attribute("Name"));
+
+    element_Navigation.setAttributeNode(attr_Up);
+    element_Navigation.setAttributeNode(attr_Down);
+    element_Navigation.setAttributeNode(attr_Left);
+    element_Navigation.setAttributeNode(attr_Right);
+
+ //---------------
+    QDomElement element_KeyeventList = xmlContents.xmlCreateNode("KeyeventList");
+
+    QDomAttr attr_KeyeventNum = xmlContents.xmlCreateAttribute(tr("KeyeventNum"));
+
+    childNode = getChildNode(cureNode, "KeyeventList");
+
+    attr_KeyeventNum.setValue(childNode.attribute("KeyeventNum"));
+
+    element_KeyeventList.setAttributeNode(attr_KeyeventNum);
+//--------------------
+    QDomElement element_StaticWndProperties = xmlContents.xmlCreateNode("StaticWndProperties");
+
+    QDomAttr attr_Text = xmlContents.xmlCreateAttribute(tr("Text"));
+    QDomAttr attr_TextColor = xmlContents.xmlCreateAttribute(tr("TextColor"));
+    QDomAttr attr_NormalBitmapID = xmlContents.xmlCreateAttribute(tr("NormalBitmapID"));
+    QDomAttr attr_FocusBitmapID = xmlContents.xmlCreateAttribute(tr("FocusBitmapID"));
+    QDomAttr attr_DisabledBitmapID = xmlContents.xmlCreateAttribute(tr("DisabledBitmapID"));
+    QDomAttr attr_NormalBgColor = xmlContents.xmlCreateAttribute(tr("NormalBgColor"));
+    QDomAttr attr_FocusBgColor = xmlContents.xmlCreateAttribute(tr("FocusBgColor"));
+    QDomAttr attr_DisabledBgColor = xmlContents.xmlCreateAttribute(tr("DisabledBgColor"));
+    QDomAttr attr_BgState = xmlContents.xmlCreateAttribute(tr("BgState"));
+    QDomAttr attr_Alpha = xmlContents.xmlCreateAttribute(tr("Alpha"));
+    QDomAttr attr_FrameColorTop = xmlContents.xmlCreateAttribute(tr("FrameColorTop"));
+    QDomAttr attr_FrameColorBottom = xmlContents.xmlCreateAttribute(tr("FrameColorBottom"));
+    QDomAttr attr_Clone = xmlContents.xmlCreateAttribute(tr("Clone"));
+    QDomAttr attr_HasNormalDrawStyle = xmlContents.xmlCreateAttribute(tr("HasNormalDrawStyle"));
+    QDomAttr attr_HasFocusDrawStyle = xmlContents.xmlCreateAttribute(tr("HasFocusDrawStyle"));
+    QDomAttr attr_HasDisableDrawStyle = xmlContents.xmlCreateAttribute(tr("HasDisableDrawStyle"));
+    QDomAttr attr_HasNormalPaletteLock= xmlContents.xmlCreateAttribute(tr("HasNormalPaletteLock"));
+    QDomAttr attr_HasFocusPaletteLock = xmlContents.xmlCreateAttribute(tr("HasFocusPaletteLock"));
+    QDomAttr attr_HasDisablePaletteLock = xmlContents.xmlCreateAttribute(tr("HasDisablePaletteLock"));
+    QDomAttr attr_NormalPaletteIndex = xmlContents.xmlCreateAttribute(tr("NormalPaletteIndex"));
+    QDomAttr attr_FocusPaletteIndex = xmlContents.xmlCreateAttribute(tr("FocusPaletteIndex"));
+    QDomAttr attr_DisablePaletteIndex = xmlContents.xmlCreateAttribute(tr("DisablePaletteIndex"));
+
+
+    if(pcnode != NULL && pcnode->isAdvanced)
+    {
+        childNode = getChildNode(pcnode->node.toElement(), "StaticWndProperties");
+    }else
+    {
+        childNode = getChildNode(cureNode, "StaticWndProperties");
+    }
+
+    attr_Text.setValue(childNode.attribute("Text"));
+    attr_TextColor.setValue(childNode.attribute("TextColor"));
+    attr_NormalBitmapID.setValue(childNode.attribute("NormalBitmapID"));
+    attr_DisabledBitmapID.setValue(childNode.attribute("DisabledBitmapID"));
+
+    attr_NormalBgColor.setValue(childNode.attribute("NormalBgColor"));
+    attr_FocusBitmapID.setValue(childNode.attribute("FocusBitmapID"));
+    attr_FocusBgColor.setValue(childNode.attribute("FocusBgColor"));
+    attr_DisabledBgColor.setValue(childNode.attribute("DisabledBgColor"));
+
+    attr_BgState.setValue(childNode.attribute("BgState"));
+    attr_Alpha.setValue(childNode.attribute("Alpha"));
+    attr_FrameColorBottom.setValue(childNode.attribute("FrameColorBottom"));
+    attr_FrameColorTop.setValue(childNode.attribute("FrameColorTop"));
+    attr_Clone.setValue(childNode.attribute("Clone"));
+
+    attr_HasFocusDrawStyle.setValue(childNode.attribute("HasFocusDrawStyle"));
+    attr_HasNormalDrawStyle.setValue(childNode.attribute("HasNormalDrawStyle"));
+    attr_HasDisableDrawStyle.setValue(childNode.attribute("HasDisableDrawStyle"));
+    attr_HasNormalPaletteLock.setValue(childNode.attribute("HasNormalPaletteLock"));
+
+    attr_HasFocusPaletteLock.setValue(childNode.attribute("HasFocusPaletteLock"));
+    attr_HasDisablePaletteLock.setValue(childNode.attribute("HasDisablePaletteLock"));
+    attr_NormalPaletteIndex.setValue(childNode.attribute("NormalPaletteIndex"));
+    attr_FocusPaletteIndex.setValue(childNode.attribute("FocusPaletteIndex"));
+    attr_DisablePaletteIndex.setValue(childNode.attribute("DisablePaletteIndex"));
+
+    element_StaticWndProperties.setAttributeNode(attr_Text);
+    element_StaticWndProperties.setAttributeNode(attr_TextColor);
+    element_StaticWndProperties.setAttributeNode(attr_NormalBitmapID);
+    element_StaticWndProperties.setAttributeNode(attr_DisabledBitmapID);
+    element_StaticWndProperties.setAttributeNode(attr_NormalBgColor);
+    element_StaticWndProperties.setAttributeNode(attr_FocusBitmapID);
+    element_StaticWndProperties.setAttributeNode(attr_FocusBgColor);
+    element_StaticWndProperties.setAttributeNode(attr_DisabledBgColor);
+
+    element_StaticWndProperties.setAttributeNode(attr_BgState);
+    element_StaticWndProperties.setAttributeNode(attr_Alpha);
+    element_StaticWndProperties.setAttributeNode(attr_FrameColorBottom);
+    element_StaticWndProperties.setAttributeNode(attr_FrameColorTop);
+    element_StaticWndProperties.setAttributeNode(attr_Clone);
+    element_StaticWndProperties.setAttributeNode(attr_HasFocusDrawStyle);
+    element_StaticWndProperties.setAttributeNode(attr_HasNormalDrawStyle);
+    element_StaticWndProperties.setAttributeNode(attr_HasDisableDrawStyle);
+    element_StaticWndProperties.setAttributeNode(attr_HasNormalPaletteLock);
+
+    element_StaticWndProperties.setAttributeNode(attr_HasFocusPaletteLock);
+    element_StaticWndProperties.setAttributeNode(attr_HasDisablePaletteLock);
+    element_StaticWndProperties.setAttributeNode(attr_NormalPaletteIndex);
+    element_StaticWndProperties.setAttributeNode(attr_FocusPaletteIndex);
+    element_StaticWndProperties.setAttributeNode(attr_DisablePaletteIndex);
+//-----------------------------
+    QDomElement element__3DShadowProperties = xmlContents.xmlCreateNode("_3DShadowProperties");
+
+    QDomAttr attr_Enable3DShadow = xmlContents.xmlCreateAttribute(tr("Enable3DShadow"));
+    QDomAttr attr_EnableTopLight = xmlContents.xmlCreateAttribute(tr("EnableTopLight"));
+    QDomAttr attr_EnableTopLight2 = xmlContents.xmlCreateAttribute(tr("EnableTopLight2"));
+    QDomAttr attr_EnableLeftLight = xmlContents.xmlCreateAttribute(tr("EnableLeftLight"));
+    QDomAttr attr_EnableLeftLight2 = xmlContents.xmlCreateAttribute(tr("EnableLeftLight2"));
+    QDomAttr attr_EnableRightShadow = xmlContents.xmlCreateAttribute(tr("EnableRightShadow"));
+    QDomAttr attr_EnableRightShadow2 = xmlContents.xmlCreateAttribute(tr("EnableRightShadow2"));
+    QDomAttr attr_EnableBottomShadow = xmlContents.xmlCreateAttribute(tr("EnableBottomShadow"));
+    QDomAttr attr_EnableBottomShadow2 = xmlContents.xmlCreateAttribute(tr("EnableBottomShadow2"));
+    QDomAttr attr_TopLightColor = xmlContents.xmlCreateAttribute(tr("TopLightColor"));
+    QDomAttr attr_TopLight2Color = xmlContents.xmlCreateAttribute(tr("TopLight2Color"));
+    QDomAttr attr_LeftLightColor = xmlContents.xmlCreateAttribute(tr("LeftLightColor"));
+    QDomAttr attr_LeftLight2Color = xmlContents.xmlCreateAttribute(tr("LeftLight2Color"));
+    QDomAttr attr_RightShadowColor = xmlContents.xmlCreateAttribute(tr("RightShadowColor"));
+    QDomAttr attr_RightShadow2Color = xmlContents.xmlCreateAttribute(tr("RightShadow2Color"));
+    QDomAttr attr_BottomShadowColor = xmlContents.xmlCreateAttribute(tr("BottomShadowColor"));
+    QDomAttr attr_BottomShadow2Color= xmlContents.xmlCreateAttribute(tr("BottomShadow2Color"));
+    QDomAttr attr_TopLightWidth = xmlContents.xmlCreateAttribute(tr("TopLightWidth"));
+    QDomAttr attr_TopLight2Width = xmlContents.xmlCreateAttribute(tr("TopLight2Width"));
+    QDomAttr attr_LeftLightWidth = xmlContents.xmlCreateAttribute(tr("LeftLightWidth"));
+    QDomAttr attr_LeftLight2Width = xmlContents.xmlCreateAttribute(tr("LeftLight2Width"));
+    QDomAttr attr_RightShadowWidth = xmlContents.xmlCreateAttribute(tr("RightShadowWidth"));
+    QDomAttr attr_RightShadow2Width = xmlContents.xmlCreateAttribute(tr("RightShadow2Width"));
+
+    QDomAttr attr_BottomShadowWidth= xmlContents.xmlCreateAttribute(tr("BottomShadowWidth"));
+    QDomAttr attr_BottomShadow2Width = xmlContents.xmlCreateAttribute(tr("BottomShadow2Width"));
+    QDomAttr attr_TopLightAlpha = xmlContents.xmlCreateAttribute(tr("TopLightAlpha"));
+    QDomAttr attr_TopLight2Alpha = xmlContents.xmlCreateAttribute(tr("TopLight2Alpha"));
+    QDomAttr attr_LeftLightAlpha = xmlContents.xmlCreateAttribute(tr("LeftLightAlpha"));
+    QDomAttr attr_LeftLight2Alpha = xmlContents.xmlCreateAttribute(tr("LeftLight2Alpha"));
+
+    QDomAttr attr_RightShadowAlpha = xmlContents.xmlCreateAttribute(tr("RightShadowAlpha"));
+    QDomAttr attr_RightShadow2Alpha = xmlContents.xmlCreateAttribute(tr("RightShadow2Alpha"));
+    QDomAttr attr_BottomShadowAlpha = xmlContents.xmlCreateAttribute(tr("BottomShadowAlpha"));
+    QDomAttr attr_BottomShadow2Alpha = xmlContents.xmlCreateAttribute(tr("BottomShadow2Alpha"));
+
+
+    childNode = getChildNode(cureNode, "_3DShadowProperties");
+
+    attr_Enable3DShadow.setValue(childNode.attribute("Enable3DShadow"));
+    attr_EnableTopLight.setValue(childNode.attribute("EnableTopLight"));
+    attr_EnableTopLight2.setValue(childNode.attribute("EnableTopLight2"));
+    attr_EnableLeftLight.setValue(childNode.attribute("EnableLeftLight"));
+
+    attr_EnableLeftLight2.setValue(childNode.attribute("EnableLeftLight2"));
+    attr_EnableRightShadow.setValue(childNode.attribute("EnableRightShadow"));
+    attr_EnableRightShadow2.setValue(childNode.attribute("EnableRightShadow2"));
+    attr_EnableBottomShadow.setValue(childNode.attribute("EnableBottomShadow"));
+
+    attr_EnableBottomShadow2.setValue(childNode.attribute("EnableBottomShadow2"));
+    attr_TopLightColor.setValue(childNode.attribute("TopLightColor"));
+    attr_TopLight2Color.setValue(childNode.attribute("TopLight2Color"));
+    attr_LeftLightColor.setValue(childNode.attribute("LeftLightColor"));
+
+    attr_LeftLight2Color.setValue(childNode.attribute("LeftLight2Color"));
+    attr_RightShadowColor.setValue(childNode.attribute("RightShadowColor"));
+    attr_RightShadow2Color.setValue(childNode.attribute("RightShadow2Color"));
+    attr_BottomShadowColor.setValue(childNode.attribute("BottomShadowColor"));
+
+    attr_BottomShadow2Color.setValue(childNode.attribute("BottomShadow2Color"));
+    attr_TopLightWidth.setValue(childNode.attribute("TopLightWidth"));
+    attr_TopLight2Width.setValue(childNode.attribute("TopLight2Width"));
+    attr_LeftLightWidth.setValue(childNode.attribute("LeftLightWidth"));
+    attr_LeftLight2Width.setValue(childNode.attribute("LeftLight2Width"));
+
+    attr_RightShadowWidth.setValue(childNode.attribute("RightShadowWidth"));
+    attr_RightShadow2Width.setValue(childNode.attribute("RightShadow2Width"));
+    attr_BottomShadowWidth.setValue(childNode.attribute("BottomShadowWidth"));
+    attr_BottomShadow2Width.setValue(childNode.attribute("BottomShadow2Width"));
+
+    attr_TopLightAlpha.setValue(childNode.attribute("TopLightAlpha"));
+    attr_TopLight2Alpha.setValue(childNode.attribute("TopLight2Alpha"));
+    attr_LeftLightAlpha.setValue(childNode.attribute("LeftLightAlpha"));
+    attr_LeftLight2Alpha.setValue(childNode.attribute("LeftLight2Alpha"));
+
+    attr_RightShadowAlpha.setValue(childNode.attribute("RightShadowAlpha"));
+    attr_RightShadow2Alpha.setValue(childNode.attribute("RightShadow2Alpha"));
+    attr_BottomShadowAlpha.setValue(childNode.attribute("BottomShadowAlpha"));
+    attr_BottomShadow2Alpha.setValue(childNode.attribute("BottomShadow2Alpha"));
+
+    element__3DShadowProperties.setAttributeNode(attr_Enable3DShadow);
+    element__3DShadowProperties.setAttributeNode(attr_EnableTopLight);
+    element__3DShadowProperties.setAttributeNode(attr_EnableTopLight2);
+    element__3DShadowProperties.setAttributeNode(attr_EnableLeftLight);
+
+    element__3DShadowProperties.setAttributeNode(attr_EnableLeftLight2);
+    element__3DShadowProperties.setAttributeNode(attr_EnableRightShadow);
+    element__3DShadowProperties.setAttributeNode(attr_EnableRightShadow2);
+    element__3DShadowProperties.setAttributeNode(attr_EnableBottomShadow);
+
+    element__3DShadowProperties.setAttributeNode(attr_EnableBottomShadow2);
+    element__3DShadowProperties.setAttributeNode(attr_TopLightColor);
+    element__3DShadowProperties.setAttributeNode(attr_TopLight2Color);
+    element__3DShadowProperties.setAttributeNode(attr_LeftLightColor);
+
+    element__3DShadowProperties.setAttributeNode(attr_LeftLight2Color);
+    element__3DShadowProperties.setAttributeNode(attr_RightShadowColor);
+    element__3DShadowProperties.setAttributeNode(attr_RightShadow2Color);
+    element__3DShadowProperties.setAttributeNode(attr_BottomShadowColor);
+
+    element__3DShadowProperties.setAttributeNode(attr_BottomShadow2Color);
+    element__3DShadowProperties.setAttributeNode(attr_TopLightWidth);
+    element__3DShadowProperties.setAttributeNode(attr_TopLight2Width);
+    element__3DShadowProperties.setAttributeNode(attr_LeftLightWidth);
+    element__3DShadowProperties.setAttributeNode(attr_LeftLight2Width);
+
+    element__3DShadowProperties.setAttributeNode(attr_RightShadowWidth);
+    element__3DShadowProperties.setAttributeNode(attr_RightShadow2Width);
+    element__3DShadowProperties.setAttributeNode(attr_BottomShadowWidth);
+    element__3DShadowProperties.setAttributeNode(attr_BottomShadow2Width);
+
+    element__3DShadowProperties.setAttributeNode(attr_TopLightAlpha);
+    element__3DShadowProperties.setAttributeNode(attr_TopLight2Alpha);
+    element__3DShadowProperties.setAttributeNode(attr_LeftLightAlpha);
+    element__3DShadowProperties.setAttributeNode(attr_LeftLight2Alpha);
+
+    element__3DShadowProperties.setAttributeNode(attr_RightShadowAlpha);
+    element__3DShadowProperties.setAttributeNode(attr_RightShadow2Alpha);
+    element__3DShadowProperties.setAttributeNode(attr_BottomShadowAlpha);
+    element__3DShadowProperties.setAttributeNode(attr_BottomShadow2Alpha);
+
+//-----------------
+    QDomElement element_GradientProperties = xmlContents.xmlCreateNode("GradientProperties");
+
+    QDomAttr attr_NormalFromColor = xmlContents.xmlCreateAttribute(tr("NormalFromColor"));
+    QDomAttr attr_NormalToColor = xmlContents.xmlCreateAttribute(tr("NormalToColor"));
+    QDomAttr attr_NormalBorderColor = xmlContents.xmlCreateAttribute(tr("NormalBorderColor"));
+    QDomAttr attr_FocusFromColor = xmlContents.xmlCreateAttribute(tr("FocusFromColor"));
+    QDomAttr attr_FocusToColor = xmlContents.xmlCreateAttribute(tr("FocusToColor"));
+    QDomAttr attr_FocusBorderColor = xmlContents.xmlCreateAttribute(tr("FocusBorderColor"));
+    QDomAttr attr_DisabledFromColor = xmlContents.xmlCreateAttribute(tr("DisabledFromColor"));
+    QDomAttr attr_DisabledToColor = xmlContents.xmlCreateAttribute(tr("DisabledToColor"));
+    QDomAttr attr_DisabledBorderColor = xmlContents.xmlCreateAttribute(tr("DisabledBorderColor"));
+    QDomAttr attr_GradientType = xmlContents.xmlCreateAttribute(tr("GradientType"));
+
+
+    childNode = getChildNode(cureNode, "GradientProperties");
+
+    attr_NormalFromColor.setValue(childNode.attribute("NormalFromColor"));
+    attr_NormalToColor.setValue(childNode.attribute("NormalToColor"));
+    attr_NormalBorderColor.setValue(childNode.attribute("NormalBorderColor"));
+    attr_FocusFromColor.setValue(childNode.attribute("FocusFromColor"));
+    attr_FocusToColor.setValue(childNode.attribute("FocusToColor"));
+    attr_FocusBorderColor.setValue(childNode.attribute("FocusBorderColor"));
+    attr_DisabledFromColor.setValue(childNode.attribute("DisabledFromColor"));
+    attr_DisabledToColor.setValue(childNode.attribute("DisabledToColor"));
+    attr_DisabledBorderColor.setValue(childNode.attribute("DisabledBorderColor"));
+    attr_GradientType.setValue(childNode.attribute("GradientType"));
+
+    element_GradientProperties.setAttributeNode(attr_NormalFromColor);
+    element_GradientProperties.setAttributeNode(attr_NormalToColor);
+    element_GradientProperties.setAttributeNode(attr_NormalBorderColor);
+    element_GradientProperties.setAttributeNode(attr_FocusFromColor);
+    element_GradientProperties.setAttributeNode(attr_FocusToColor);
+    element_GradientProperties.setAttributeNode(attr_FocusBorderColor);
+    element_GradientProperties.setAttributeNode(attr_DisabledFromColor);
+    element_GradientProperties.setAttributeNode(attr_DisabledToColor);
+    element_GradientProperties.setAttributeNode(attr_DisabledBorderColor);
+    element_GradientProperties.setAttributeNode(attr_GradientType);
+
+    newNode.appendChild(element_Position);
+    newNode.appendChild(element_State);
+    newNode.appendChild(element_Text);
+    newNode.appendChild(element_Frame);
+    newNode.appendChild(element_Border);
+    newNode.appendChild(element_Alpha);
+    newNode.appendChild(element_Effect);
+    newNode.appendChild(element_Navigation);
+    newNode.appendChild(element_KeyeventList);
+    newNode.appendChild(element_StaticWndProperties);
+    newNode.appendChild(element__3DShadowProperties);
+    newNode.appendChild(element_GradientProperties);
+
+    if(type == ADD_NEW_BEFORE)
+    {
+        insertNode.parentNode().insertBefore(newNode, cureNode);
+        Menu_Wnd *nwnd = new Menu_Wnd;
+        nwnd->node = newNode;
+        nwnd->frame = wnd->frame;
+        nwnd->parent = wnd->parent;
+        nwnd->isMainFrame = false;
+        menuWndList.append(nwnd);
+        return nwnd;
+    }else if(type == ADD_NEW_AFTER)
+    {
+        insertNode.parentNode().insertAfter(newNode, cureNode);
+        Menu_Wnd *nwnd = new Menu_Wnd;
+        nwnd->node = newNode;
+        nwnd->frame = wnd->frame;
+        nwnd->parent = wnd->parent;
+        nwnd->isMainFrame = false;
+        menuWndList.append(nwnd);
+        return nwnd;
+    }
+
+    else if(type == ADD_MOVE_UP)
+    {
+        insertNode.parentNode().insertBefore(newNode, insertNode);
+        insertNode.parentNode().removeChild(copywnd->node);
+        copywnd->node = wnd->node;
+        wnd->node = newNode;
+    }else if(type == ADD_MOVE_DOWN)
+    {
+        insertNode.parentNode().insertAfter(newNode, insertNode);
+        insertNode.parentNode().removeChild(copywnd->node);
+        copywnd->node = wnd->node;
+        wnd->node = newNode;
+    }
+    return wnd;
 }
 
 void xmlExample::showtips(QString tips)
@@ -566,4 +1178,129 @@ bool xmlExample::copyFileToPath(QString sourceDir ,QString toDir, bool coverFile
         return false;
     }
     return true;
+}
+
+void xmlExample::on_ptn_insert_clicked()
+{
+    if(m_CopyNode.type == CNONE)
+    {
+        return;
+    }
+    Menu_Wnd *nwnd;
+    int index;
+   QList<QTreeWidgetItem*> itemlist = ui->menu_tree->selectedItems();
+   foreach (QTreeWidgetItem* item, itemlist) {
+       foreach(Menu_Wnd * wnd, menuWndList)
+       {
+           if(wnd->item == item)
+           {
+               nwnd = add_xmlnode(wnd, wnd, &m_CopyNode, ADD_NEW_BEFORE);
+               QTreeWidgetItem *item=new QTreeWidgetItem(0);
+               item->setText(0,nwnd->node.toElement().attribute("Name"));
+               item->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsEnabled|Qt::ItemIsSelectable);
+               item->setCheckState(0,Qt::Unchecked);
+               index = wnd->parent->item->indexOfChild(wnd->item);
+               wnd->parent->item->insertChild(index, item);
+               nwnd->item = item;
+           }
+       }
+   }
+}
+
+void xmlExample::on_ptn_moveup_clicked()
+{
+    Menu_Wnd *curwnd;
+    Menu_Wnd *brownd;
+    int index;
+    QTreeWidgetItem* tempitem;
+
+
+    QList<QTreeWidgetItem*> itemlist = ui->menu_tree->selectedItems();
+    foreach (QTreeWidgetItem* item, itemlist) {
+        tempitem = item;
+        curwnd = getMenu_node(item);
+        brownd = curwnd->lbroher;
+        if(brownd != curwnd)
+        {
+            index = curwnd->parent->item->indexOfChild(brownd->item);
+            curwnd->parent->item->removeChild(item);
+            curwnd->parent->item->insertChild(index, tempitem);
+            curwnd->item = brownd->item;
+            brownd->item = tempitem;
+
+            add_xmlnode(brownd, curwnd, NULL, ADD_MOVE_UP);
+        }
+    }
+
+}
+
+void xmlExample::on_ptn_movedowm_clicked()
+{
+    Menu_Wnd *curwnd;
+    Menu_Wnd *brownd;
+    int index;
+    QTreeWidgetItem* tempitem;
+
+    QList<QTreeWidgetItem*> itemlist = ui->menu_tree->selectedItems();
+    foreach (QTreeWidgetItem* item, itemlist) {
+        tempitem = item;
+        curwnd = getMenu_node(item);
+        brownd = curwnd->rbroher;
+        if(brownd != curwnd)
+        {
+            index = curwnd->parent->item->indexOfChild(brownd->item);
+            curwnd->parent->item->removeChild(item);
+            curwnd->parent->item->insertChild(index, tempitem);
+            curwnd->item = brownd->item;
+            brownd->item = tempitem;
+
+            add_xmlnode(brownd, curwnd, NULL, ADD_MOVE_DOWN);
+        }
+    }
+
+}
+
+void xmlExample::removeChild(Menu_Wnd *wnd)
+{
+    Menu_Wnd *w = wnd->firstChild;
+    if(w != wnd)
+    {
+        while(w->rbroher != w)
+        {
+            w = w->rbroher;
+            removeChild(w->lbroher);
+            wnd->node.parentNode().removeChild(w->lbroher->node);
+            menuWndList.removeOne(w->lbroher);
+            delete w->lbroher;
+        }
+        removeChild(w);
+        wnd->node.parentNode().removeChild(w->node);
+        menuWndList.removeOne(w);
+        delete w;
+    }
+}
+
+
+void xmlExample::on_ptn_delete_clicked()
+{
+    Menu_Wnd *curwnd;
+    QList<QTreeWidgetItem*> itemlist = ui->menu_tree->selectedItems();
+    foreach (QTreeWidgetItem* item, itemlist) {
+        curwnd = getMenu_node(item);
+        removeChild(curwnd);
+        curwnd->node.parentNode().removeChild(curwnd->node);
+        menuWndList.removeOne(curwnd);
+
+        if(curwnd->lbroher != curwnd)
+        {
+            curwnd->lbroher->rbroher = curwnd->rbroher;
+            curwnd->rbroher->lbroher = curwnd->lbroher;
+        }else if(curwnd->rbroher != curwnd)
+        {
+            curwnd->rbroher->lbroher = curwnd->rbroher;
+        }
+
+        delete curwnd;
+        curwnd->parent->item->removeChild(item);
+    }
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1269</width>
-    <height>771</height>
+    <width>1243</width>
+    <height>778</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,14 +58,14 @@
    <widget class="QPushButton" name="ptn_setitem">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>540</y>
+      <x>420</x>
+      <y>580</y>
       <width>93</width>
       <height>28</height>
      </rect>
     </property>
     <property name="text">
-     <string>确定修改</string>
+     <string>修改属性</string>
     </property>
    </widget>
    <widget class="QComboBox" name="cb_Frame">
@@ -156,12 +156,6 @@
       </rect>
      </property>
     </widget>
-    <zorder>label_2</zorder>
-    <zorder>le_XPos</zorder>
-    <zorder>le_YPos</zorder>
-    <zorder>le_Width</zorder>
-    <zorder>le_Height</zorder>
-    <zorder>cb_display</zorder>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -235,7 +229,7 @@
       <x>80</x>
       <y>340</y>
       <width>421</width>
-      <height>131</height>
+      <height>231</height>
      </rect>
     </property>
     <property name="title">
@@ -292,8 +286,8 @@
     <property name="geometry">
      <rect>
       <x>510</x>
-      <y>590</y>
-      <width>93</width>
+      <y>580</y>
+      <width>121</width>
       <height>28</height>
      </rect>
     </property>
@@ -304,9 +298,9 @@
    <widget class="QPushButton" name="ptn_pase_attr">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>590</y>
-      <width>93</width>
+      <x>640</x>
+      <y>580</y>
+      <width>101</width>
       <height>28</height>
      </rect>
     </property>
@@ -318,13 +312,13 @@
     <property name="geometry">
      <rect>
       <x>750</x>
-      <y>590</y>
-      <width>93</width>
+      <y>580</y>
+      <width>111</width>
       <height>28</height>
      </rect>
     </property>
     <property name="text">
-     <string>插入</string>
+     <string>向前插入</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="cb_display">
@@ -405,13 +399,52 @@
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="ptn_moveup">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>580</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>上移</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ptn_movedowm">
+    <property name="geometry">
+     <rect>
+      <x>980</x>
+      <y>580</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>下移</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ptn_delete">
+    <property name="geometry">
+     <rect>
+      <x>1080</x>
+      <y>580</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>删除</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1269</width>
+     <width>1243</width>
      <height>26</height>
     </rect>
    </property>
