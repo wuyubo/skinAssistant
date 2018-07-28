@@ -4,7 +4,7 @@
 #define WORK_FILE  "./ZUI_WORK.xml"
 #define BACK_UP_FILE "./bak/ZUI_bak.xml"
 
-#define XML_PATH  "Y:/Nos/panasonic/panasonic_ui/osd_resource/skintool/res1366x768x565"
+#define XML_PATH  "./"
 
 typedef enum
 {
