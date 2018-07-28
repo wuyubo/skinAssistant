@@ -1,5 +1,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
+#define VERSION   "skinAssistant V1.0"
 #define WORK_FILE  "./ZUI_WORK.xml"
 #define BACK_UP_FILE "./bak/ZUI_bak.xml"
 

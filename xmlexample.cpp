@@ -49,7 +49,7 @@ void xmlExample::on_ptn_read_clicked()
         parseXml();
         initTreeWidget();
         showImge();
-        showtips("打开"+filepath);
+        showtips("打开 "+filepath+" 成功");
         imgRootPath = filepath.replace("ZUI.xml", "../../bitmap1366x768x565/");
     }
 }
@@ -69,7 +69,7 @@ void xmlExample::on_ptn_write_clicked()
         file.close();
         qDebug() << filepath;
         copyFileToPath(WORK_FILE, filepath, true);
-        showtips("保存"+filepath);
+        showtips("保存 "+filepath+" 成功");
     }
 }
 
@@ -413,6 +413,7 @@ void xmlExample::on_ptn_setitem_clicked()
          setWndAttr(wnd);
          currentItem->setText(0, ui->le_name->text());
      }
+     showtips("修改属性成功");
 }
 
 Menu_Wnd * xmlExample::getMenu_node(QTreeWidgetItem * item)
@@ -707,6 +708,7 @@ void xmlExample::on_ptn_copy_clicked()
 
         }
     }
+    showtips("复制成功");
 }
 
 void xmlExample::on_ptn_pase_attr_clicked()
@@ -728,6 +730,7 @@ void xmlExample::on_ptn_pase_attr_clicked()
        }
    }
     showWndAttr(curwnd);
+    showtips("粘贴成功");
 }
 QDomElement xmlExample::getChildNode(QDomElement node, QString childName)
 {
@@ -1344,6 +1347,7 @@ void xmlExample::on_ptn_insert_clicked()
            }
        }
    }
+   showtips("插入成功");
 }
 
 void xmlExample::on_ptn_moveup_clicked()
@@ -1370,6 +1374,7 @@ void xmlExample::on_ptn_moveup_clicked()
             add_xmlnode(brownd, curwnd, NULL, ADD_MOVE_UP);
         }
     }
+    showtips("移动成功");
 
 }
 
@@ -1396,7 +1401,7 @@ void xmlExample::on_ptn_movedowm_clicked()
             add_xmlnode(brownd, curwnd, NULL, ADD_MOVE_DOWN);
         }
     }
-
+    showtips("移动成功");
 }
 
 void xmlExample::removeChild(Menu_Wnd *wnd)
@@ -1442,6 +1447,7 @@ void xmlExample::on_ptn_delete_clicked()
         delete curwnd;
         curwnd->parent->item->removeChild(item);
     }
+    showtips("删除成功");
 }
 
 void xmlExample::on_ptn_addimg_clicked()

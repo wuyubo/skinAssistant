@@ -22,3 +22,6 @@ HEADERS  += xmlexample.h \
     global.h
 
 FORMS    += xmlexample.ui
+
+DISTFILES += \
+    skin.png
