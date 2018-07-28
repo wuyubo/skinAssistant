@@ -56,6 +56,7 @@ typedef struct StaticWndProperties
     QString FocusBgColor;
     QString DisabledBgColor;
     QString Clone;
+    QString BgState;
 }XStaticWndProperties;
 
 typedef struct Wnd

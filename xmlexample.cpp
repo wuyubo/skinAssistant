@@ -30,7 +30,7 @@ void xmlExample::initCopyNode()
 void xmlExample::on_ptn_read_clicked()
 {
     filepath = QFileDialog::getOpenFileName(this,QString::fromLocal8Bit("Choose xml"),
-                                           "./",tr("*.xml"));
+                                           XML_PATH,tr("*.xml"));
     if(filepath != NULL)
     {
         copyFileToPath(filepath, BACK_UP_FILE, true);
@@ -46,8 +46,11 @@ void xmlExample::on_ptn_read_clicked()
         m_docElem = xmlContents.xmlRead(&file);
 
         file.close();
+        parseXml();
         initTreeWidget();
+        showImge();
         showtips("打开"+filepath);
+        imgRootPath = filepath.replace("ZUI.xml", "../../bitmap1366x768x565/");
     }
 }
 
@@ -198,6 +201,112 @@ void xmlExample::GetGWnd(QDomNode node)
 
 }
 
+void xmlExample::parseXml()
+{
+    QDomNode n=m_docElem.firstChild();
+
+    while (!n.isNull ())
+    {
+       if (n.isElement ()) {
+           //将其转换为元素
+           QDomElement e = n.toElement ();
+
+           if(e.tagName () == "GWndList")
+           {
+               QDomNodeList list = e.childNodes ();
+               for (int i = 0; i< list.count ();i++)
+               {
+                   QDomNode node = list.at(i);
+
+                   if (node.isElement ())
+                   {
+                       if(node.toElement().tagName() == "GWnd")
+                       {
+                           GetGWnd(node);
+                       }
+                   }
+               }
+           }
+           else if(e.tagName () == "ImageList")
+           {
+                getImageList(e);
+           }
+       }
+       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
+   }
+}
+
+XImg *xmlExample::getIamge(QDomNode node)
+{
+    QDomNodeList list = node.toElement().childNodes();
+    XImg *img = new XImg;
+    for (int i = 0; i< list.count ();i++)
+    {
+        QDomNode node2 = list.at(i);
+        if (node2.isElement())
+        {
+            if(node2.toElement().tagName() == "FileName")
+            {
+                img->FileName = node2.toElement().text();
+            }else if(node2.toElement().tagName() == "FolderName")
+            {
+                img->FolderName = node2.toElement().text();
+            }
+        }
+    }
+    return img;
+
+}
+
+void xmlExample::getImageList(QDomElement enode)
+{
+    QDomNodeList list = enode.childNodes();
+    for (int i = 0; i< list.count ();i++)
+    {
+        QDomNode node2 = list.at(i);
+        if (node2.isElement())
+        {
+           if(node2.toElement().tagName() == "Image")
+           {
+                XImg *img = getIamge(node2);
+                if(img != NULL)
+                {
+                    img->ID = node2.toElement().attribute("ID");
+                    ImgList.append(img);
+                }
+           }
+        }
+    }
+
+}
+
+void xmlExample::showImge()
+{
+    QStringList strList;
+    foreach(XImg * img, ImgList)
+    {
+        strList.append(img->ID);
+    }
+
+    int nCount = strList.size();
+    QStandardItemModel *standardItemModel = new QStandardItemModel(this);
+    for(int i = 0; i < nCount; i++)
+    {
+        QString string = static_cast<QString>(strList.at(i));
+        QStandardItem *item = new QStandardItem(string);
+        if(i % 2 == 1)
+        {
+            QLinearGradient linearGrad(QPointF(0, 0), QPointF(200, 200));
+            linearGrad.setColorAt(0, Qt::gray);
+            //linearGrad.setColorAt(1, Qt::yellow);
+            QBrush brush(linearGrad);
+            item->setBackground(brush);
+        }
+        standardItemModel->appendRow(item);
+    }
+    ui->lv_img_list->setModel(standardItemModel);
+}
+
 //initTreeWidget() 的实现
 void xmlExample::initTreeWidget()
 {
@@ -205,34 +314,7 @@ void xmlExample::initTreeWidget()
    // listWidget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection) #设置选择模式
 
    // 选择模式有:ExtendedSelection 按住ctrl多选, SingleSelection 单选 MultiSelection 点击多选 ContiguousSelection 鼠标拖拉多选
-     QDomNode n=m_docElem.firstChild();
 
-     while (!n.isNull ())
-     {
-        if (n.isElement ()) {
-            //将其转换为元素
-            QDomElement e = n.toElement ();
-
-            if(e.tagName () == "GWndList")
-            {
-                QDomNodeList list = e.childNodes ();
-                for (int i = 0; i< list.count ();i++)
-                {
-                    QDomNode node = list.at(i);
-
-                    if (node.isElement ())
-                    {
-                        if(node.toElement().tagName() == "GWnd")
-                        {
-                            GetGWnd(node);
-                        }
-                        //qDebug() << qPrintable(node.toElement().tagName ()) << qPrintable(node.toElement().attribute("Name"));
-                    }
-                }
-            }
-        }
-        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
-    }
     showWndlist();
 }
 
@@ -240,6 +322,7 @@ void xmlExample::initTreeWidget()
 void xmlExample::treeItemChanged(QTreeWidgetItem *item, int column)
 {
     QString itemText=item->text(0);
+    column = column;
     //选中时
     if(Qt::Checked==item->checkState(0))
     {
@@ -388,6 +471,25 @@ void  xmlExample::setWndAttr(Menu_Wnd *wnd)
            if(e.tagName () == "StaticWndProperties")
            {
                 e.toElement().setAttribute("Clone", ui->le_clone->text());
+
+                e.toElement().setAttribute("NormalBgColor", ui->le_anomcolor->text());
+                e.toElement().setAttribute("FocusBgColor", ui->le_afoccolor->text());
+                e.toElement().setAttribute("DisabledBgColor", ui->le_adiscolor->text());
+                e.toElement().setAttribute("NormalBitmapID", ui->le_nomBitmap->text());
+                e.toElement().setAttribute("FocusBitmapID", ui->le_focBitmap->text());
+                e.toElement().setAttribute("DisabledBitmapID", ui->le_disBitmap->text());
+
+                if(ui->rbn_clone->isCheckable())
+                {
+                    e.toElement().setAttribute("BgState", "0");
+                }else if(ui->rbn_color->isCheckable())
+                {
+                    e.toElement().setAttribute("BgState", "1");
+                }
+                else if(ui->rbn_bitmap->isCheckable())
+                {
+                    e.toElement().setAttribute("BgState", "2");
+                }
            }
        }
        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
@@ -434,6 +536,14 @@ void  xmlExample::cloneWndAttr(Menu_Wnd *wnd, CNode cnode)
            if(e.tagName () == "StaticWndProperties" && (m_CopyNode.type == CALL || m_CopyNode.isAdvanced))
            {
                 e.toElement().setAttribute("Clone", cnode.properties.Clone);
+
+                e.toElement().setAttribute("NormalBgColor", cnode.properties.NormalBgColor);
+                e.toElement().setAttribute("FocusBgColor", cnode.properties.FocusBgColor);
+                e.toElement().setAttribute("DisabledBgColor", cnode.properties.DisabledBgColor);
+                e.toElement().setAttribute("NormalBitmapID", cnode.properties.NormalBitmapID);
+                e.toElement().setAttribute("FocusBitmapID", cnode.properties.FocusBitmapID);
+                e.toElement().setAttribute("DisabledBitmapID", cnode.properties.DisabledBitmapID);
+                e.toElement().setAttribute("BgState", cnode.properties.BgState);
            }
        }
        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
@@ -468,7 +578,27 @@ void xmlExample::showWndAttr(Menu_Wnd *wnd)
            }
            if(e.tagName () == "StaticWndProperties")
            {
+                QString state = e.toElement().attribute("BgState");
                 ui->le_clone->setText(e.toElement().attribute("Clone"));
+                ui->le_anomcolor->setText(e.toElement().attribute("NormalBgColor"));
+                ui->le_afoccolor->setText(e.toElement().attribute("FocusBgColor"));
+                ui->le_adiscolor->setText(e.toElement().attribute("DisabledBgColor"));
+                ui->le_nomBitmap->setText(e.toElement().attribute("NormalBitmapID"));
+                ui->le_focBitmap->setText(e.toElement().attribute("FocusBitmapID"));
+                ui->le_disBitmap->setText(e.toElement().attribute("DisabledBitmapID"));
+
+                if(state == "0")
+                {
+                    ui->rbn_clone->setChecked(true);
+                }else if(state == "1")
+                {
+                    ui->rbn_color->setChecked(true);
+                }
+                else if(state == "2")
+                {
+                    ui->rbn_bitmap->setChecked(true);
+                }
+                showIconFromId(e.toElement().attribute("NormalBitmapID"));
            }
        }
        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
@@ -503,6 +633,15 @@ void xmlExample::copyWndAttr(Menu_Wnd *wnd)
            if(e.tagName () == "StaticWndProperties" && (m_CopyNode.type == CALL || m_CopyNode.isAdvanced))
            {
                 m_CopyNode.properties.Clone = e.toElement().attribute("Clone");
+
+                m_CopyNode.properties.FocusBgColor = e.toElement().attribute("FocusBgColor");
+                m_CopyNode.properties.DisabledBgColor = e.toElement().attribute("DisabledBgColor");
+                m_CopyNode.properties.NormalBgColor = e.toElement().attribute("NormalBgColor");
+
+                m_CopyNode.properties.NormalBitmapID = e.toElement().attribute("NormalBitmapID");
+                m_CopyNode.properties.FocusBitmapID = e.toElement().attribute("FocusBitmapID");
+                m_CopyNode.properties.DisabledBitmapID = e.toElement().attribute("DisabledBitmapID");
+                m_CopyNode.properties.BgState = e.toElement().attribute("BgState");
            }
        }
        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
@@ -1303,4 +1442,46 @@ void xmlExample::on_ptn_delete_clicked()
         delete curwnd;
         curwnd->parent->item->removeChild(item);
     }
+}
+
+void xmlExample::on_ptn_addimg_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("打开图像"), ".", tr("*.jpg *.bmp *.png"));
+    QPixmap src(fileName);//QPixmap src;   src.load(fileName);
+
+    ui->lb_img->setPixmap(src);//若改变图像适应label，则 ui->label->setPixmap(src.scaled(ui->label->size()));
+}
+
+void xmlExample::showIconFromId(QString ID)
+{
+    qDebug() << ID;
+    foreach(XImg * img, ImgList)
+    {
+        if(img->ID == ID)
+        {
+            showIcon(img);
+        }
+    }
+}
+
+void xmlExample::showIcon(XImg *img)
+{
+    QString filepath;
+    if(img->FolderName.replace("\\", "/") == "../../bitmap1366x768x565")
+    {
+        filepath = imgRootPath+img->FileName;
+    }else
+    {
+        filepath = imgRootPath+img->FolderName.replace("\\", "/")+"/"+img->FileName;
+    }
+    qDebug() << filepath;
+    QPixmap src(filepath);//QPixmap src;   src.load(fileName);
+    ui->lb_img->setPixmap(src);//若改变图像适应label，则 ui->label->setPixmap(src.scaled(ui->label->size()));
+}
+
+void xmlExample::on_lv_img_list_clicked(const QModelIndex &index)
+{
+    XImg *img = ImgList.at(index.row());
+    showIcon(img);
+
 }

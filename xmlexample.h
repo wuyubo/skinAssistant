@@ -9,6 +9,7 @@
 #include <QXmlStreamReader>
 #include <QTreeWidgetItem>
 #include "zxml.h"
+#include <QStandardItem>
 
 namespace Ui {
 class xmlExample;
@@ -24,6 +25,12 @@ typedef struct Menu_Wnd{
     struct Menu_Wnd *rbroher;
     bool isMainFrame;
 }XMenu_Wnd;
+
+typedef struct IMG{
+    QString ID;
+    QString FileName;
+    QString FolderName;
+}XImg;
 
 typedef enum CopyType
 {
@@ -72,6 +79,12 @@ public:
   bool copyFileToPath(QString sourceDir ,QString toDir, bool coverFileIfExist);
   QDomElement getChildNode(QDomElement node, QString childName);
   void removeChild(Menu_Wnd *wnd);
+  void parseXml();
+  void getImageList(QDomElement enode);
+  XImg *getIamge(QDomNode node);
+  void showImge();
+  void showIcon(XImg *img);
+  void showIconFromId(QString ID);
 
 private slots:
     void on_ptn_read_clicked();
@@ -95,9 +108,11 @@ private slots:
 
     void on_ptn_movedowm_clicked();
 
-    void on_ptn_movedowm_2_clicked();
-
     void on_ptn_delete_clicked();
+
+    void on_ptn_addimg_clicked();
+
+    void on_lv_img_list_clicked(const QModelIndex &index);
 
 private:
   Ui::xmlExample *ui;
@@ -107,8 +122,10 @@ private:
   XSkinToolProject *skintoolprj;
   QDomElement m_docElem;
   QList<Menu_Wnd *> menuWndList;
+  QList<XImg *>  ImgList;
   CNode m_CopyNode;
   QString filepath;
+  QString imgRootPath;
 };
 
 #endif // XMLEXAMPLE_H
