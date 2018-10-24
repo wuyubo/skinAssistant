@@ -15,13 +15,22 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         xmlexample.cpp \
-    zxml.cpp
+    zxml.cpp \
+    setting.cpp \
+    xlabel.cpp \
+    dialogui.cpp \
+    interface.cpp
 
 HEADERS  += xmlexample.h \
     zxml.h \
-    global.h
+    global.h \
+    setting.h \
+    xlabel.h \
+    dialogui.h \
+    interface.h
 
-FORMS    += xmlexample.ui
+FORMS    += xmlexample.ui \
+    dialogui.ui
 
 DISTFILES += \
     skin.png

@@ -24,10 +24,12 @@ struct XmlNumberInfo
 
 typedef struct Position
 {
-    QString X;
-    QString Y;
-    QString Width;
-    QString Height;
+    int X;
+    int Y;
+    int Width;
+    int Height;
+    int Px;
+    int Py;
 }XPostoin;
 typedef struct Text
 {
@@ -57,6 +59,9 @@ typedef struct StaticWndProperties
     QString DisabledBgColor;
     QString Clone;
     QString BgState;
+    QString HasNormalDrawStyle;
+    QString HasFocusDrawStyle;
+    QString HasDisableDrawStyle;
 }XStaticWndProperties;
 
 typedef struct Wnd

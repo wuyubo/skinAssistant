@@ -3,6 +3,9 @@
 
 #define FILENAME "xmlfile.xml"
 #include "global.h"
+#include "setting.h"
+#include "interface.h"
+#include "dialogui.h"
 #include <QDebug>
 #include <QMainWindow>
 #include <QFile>
@@ -10,47 +13,13 @@
 #include <QTreeWidgetItem>
 #include "zxml.h"
 #include <QStandardItem>
+#include <QLabel>
 
 namespace Ui {
 class xmlExample;
 }
 
-typedef struct Menu_Wnd{
-    QString frame;
-    QDomNode node;
-    QTreeWidgetItem *item;
-    struct Menu_Wnd *parent;
-    struct Menu_Wnd *firstChild;
-    struct Menu_Wnd *lbroher;
-    struct Menu_Wnd *rbroher;
-    bool isMainFrame;
-}XMenu_Wnd;
 
-typedef struct IMG{
-    QString ID;
-    QString FileName;
-    QString FolderName;
-}XImg;
-
-typedef enum CopyType
-{
-    CNONE = 0,
-    CSOME,
-    CALL,
-}CType;
-
-typedef struct CopyNode{
-    CType type;
-    QDomNode node;
-    bool isText;
-    bool isDisplay;
-    bool isAdvanced;
-    QString Name;
-    XPostoin position;
-    XText   text;
-    XNavigation navigation;
-    XStaticWndProperties properties;
-}CNode;
 
 
 class xmlExample : public QMainWindow
@@ -64,37 +33,46 @@ public:
   void initCopyNode();
   void initTreeWidget();
   void updateParentItem(QTreeWidgetItem *item);
-  void GetWndList(QString frame, QDomNode node);
-  void GetGWnd(QDomNode node);
   void showWndlist();
-  Menu_Wnd * getlbrother(Menu_Wnd *curwnd, Menu_Wnd *prewnd);
-  Menu_Wnd * getMenu_node(QTreeWidgetItem * item);
   void showWndAttr(Menu_Wnd *wnd);
-  Menu_Wnd *getParentWnd(QString parenName, Menu_Wnd *prevWnd);
-  void setWndAttr(Menu_Wnd *wnd);
-  void cloneWndAttr(Menu_Wnd *wnd, CNode cnode);
-  void copyWndAttr(Menu_Wnd *wnd);
-  Menu_Wnd * add_xmlnode(Menu_Wnd *wnd, Menu_Wnd *copywnd, CopyNode *pcnode, ADD_NODE_TYPE type = ADD_NEW_BEFORE);
   void showtips(QString tips);
-  bool copyFileToPath(QString sourceDir ,QString toDir, bool coverFileIfExist);
-  QDomElement getChildNode(QDomElement node, QString childName);
-  void removeChild(Menu_Wnd *wnd);
-  void parseXml();
-  void getImageList(QDomElement enode);
   XImg *getIamge(QDomNode node);
   void showImge();
-  void showIcon(XImg *img);
-  void showIconFromId(QString ID);
+  void showIcon(XImg *img, QLabel *lb_icon);
+  void showIconFromId(QString ID, QLabel *lb_icon);
+
+  void set_mode(OPTION_MODE mode);
+
+  void showCloneStaticWndProperties(Menu_Wnd *show_wnd, Menu_Wnd *wnd);
+  void showWndToUi(Menu_Wnd *wnd);
+  void hideWndFromUi(Menu_Wnd *wnd);
+  void refreshWndFromUi(Menu_Wnd *wnd);
+  void showTreetoUI(Menu_Wnd *wnd);
+  void hideTreeFromUI(Menu_Wnd *w);
+  void clearCopy();
+  void  copyWndAttr(Menu_Wnd *wnd);
+  void  setWndAttr(Menu_Wnd *wnd);
+
+public:
+  void on_ptn_alignleft_clicked();
+
+  void on_ptn_aligncenter_clicked();
+
+  void on_ptn_alignright_clicked();
+
+  void on_ptn_alignup_clicked();
+
+  void on_ptn_aligncenter_UD_clicked();
+
+  void on_ptn_aligndown_clicked();
+  void on_ptn_copy_tree_clicked();
+  void on_ptn_conver_clicked();
 
 private slots:
-    void on_ptn_read_clicked();
 
-    void on_ptn_write_clicked();
     void treeItemChanged(QTreeWidgetItem *item, int column);
 
     void on_ptn_setitem_clicked();
-
-    void on_cb_Frame_currentIndexChanged(int index);
 
     void on_menu_tree_itemClicked(QTreeWidgetItem *item, int column);
 
@@ -114,18 +92,77 @@ private slots:
 
     void on_lv_img_list_clicked(const QModelIndex &index);
 
+    void on_ptn_insert_after_clicked();
+
+    void on_ptn_insert_child_clicked();
+
+    void on_ptn_showIcon_clicked();
+
+    void on_ptn_showIcon_2_clicked();
+
+    void on_ptn_showIcon_3_clicked();
+
+
+
+    void on_ptn_pase_attr_tree_clicked();
+
+    void on_actionAbout_triggered();
+
+    void on_cb_Frame_currentIndexChanged(const QString &arg1);
+
+
+
+    void on_ptn_refresh_clicked();
+
+
+
+    void on_ptn_moveleft_pos_clicked();
+
+    void on_ptn_moveright_pos_clicked();
+
+    void on_ptn_moveup_pos_clicked();
+
+    void on_ptn_movedown_pos_clicked();
+
+    void on_action_triggered();
+
+    void on_action_save_triggered();
+
+    void on_action_switch_triggered();
+
+    void on_action_align_left_triggered();
+
+    void on_action_alignright_triggered();
+
+    void on_action_alignCenter1_triggered();
+
+    void on_action_alignUp_triggered();
+
+    void on_action_alignCenter2_triggered();
+
+    void on_action_alighDown_triggered();
+
+
+    void on_action_postion_triggered();
+
+    void on_action_size_triggered();
+signals:
+    void refreshUI_sig();
 private:
   Ui::xmlExample *ui;
-  ZXml xmlContents;
+  InterFace *pinterface;
+
   QXmlStreamReader *xmlReader;
   XmlNumberInfo* pnumberInfo;
   XSkinToolProject *skintoolprj;
-  QDomElement m_docElem;
-  QList<Menu_Wnd *> menuWndList;
-  QList<XImg *>  ImgList;
+
+
   CNode m_CopyNode;
-  QString filepath;
-  QString imgRootPath;
+  Menu_Wnd *copyTree;
+  QString oldFrame;
+  OPTION_MODE opt_mode;
+
+  DialogUI *pDialogUI;
 };
 
 #endif // XMLEXAMPLE_H
