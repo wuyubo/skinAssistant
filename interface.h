@@ -15,6 +15,11 @@
 #include <QStandardItem>
 #include <QLabel>
 
+typedef enum{
+    ST_FOCUS,
+    ST_NOMAL,
+    ST_DISABLE,
+}ITEM_STATUS;
 typedef struct Menu_Wnd{
     QString frame;
     QDomNode node;
@@ -36,7 +41,7 @@ typedef struct IMG{
 }XImg;
 
 typedef struct STRING{
-    QDomNode imgNode;
+    QDomNode strNode;
     QString ID;
     QString String;
     QString languageID;
@@ -114,6 +119,13 @@ public:
    // void cloneNode(QDomNode node, QDomNode cnode);
    // void cloneTree(Menu_Wnd * wnd, Menu_Wnd * ctree);
     void  cloneWndAttr(Menu_Wnd *wnd, CNode cnode, CNode _CopyNode);
+    QString getWinIamgeId(Menu_Wnd *wnd, ITEM_STATUS status);
+    void setWinIamgeId(Menu_Wnd *wnd, QString imgID, ITEM_STATUS status);
+    bool isCheckImgFromID(QString imgID);
+    bool removeImg(XImg *img);
+    QString getWinStrId(Menu_Wnd *wnd);
+    void setWinStrId(Menu_Wnd *wnd, QString imgID);
+    bool removeStr(XString *str);
     ////////////////
 
 signals:

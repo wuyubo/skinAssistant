@@ -6,6 +6,8 @@
 #include "setting.h"
 #include "interface.h"
 #include "dialogui.h"
+#include "dialogimageclone.h"
+#include "dialogclean.h"
 #include <QDebug>
 #include <QMainWindow>
 #include <QFile>
@@ -146,6 +148,10 @@ private slots:
     void on_action_postion_triggered();
 
     void on_action_size_triggered();
+    void on_action_imageClone_triggered();
+
+    void on_action_clean_triggered();
+
 signals:
     void refreshUI_sig();
 private:
@@ -163,6 +169,9 @@ private:
   OPTION_MODE opt_mode;
 
   DialogUI *pDialogUI;
+  DialogImageClone *pDialogImageClone;
+  DialogClean *pDialogClean;
+
 };
 
 #endif // XMLEXAMPLE_H

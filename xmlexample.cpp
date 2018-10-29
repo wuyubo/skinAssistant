@@ -18,6 +18,8 @@ xmlExample::xmlExample(QWidget *parent) :
   //this->showMaximized();
   pinterface = new InterFace(this);
   pDialogUI  = new DialogUI(pinterface, this);
+  pDialogImageClone = new DialogImageClone(pinterface, this);
+  pDialogClean = new DialogClean(pinterface, this);
   pinterface->setCurframe(ui->cb_Frame->currentText());
   connect(ui->menu_tree,SIGNAL(itemChanged(QTreeWidgetItem *,int)),this,SLOT(treeItemChanged(QTreeWidgetItem*,int)));
   connect(this,SIGNAL(refreshUI_sig()),pDialogUI,SLOT(refreshUI()));
@@ -1576,8 +1578,19 @@ void xmlExample::on_action_size_triggered()
         }
     }
 }
+void xmlExample::on_action_imageClone_triggered()
+{
+    pDialogImageClone->show();
+}
 //================= main bar action  end========================================
 
 
 
 
+
+
+
+void xmlExample::on_action_clean_triggered()
+{
+    pDialogClean->show();
+}

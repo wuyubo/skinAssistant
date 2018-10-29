@@ -65,6 +65,7 @@ void InterFace::parseXml()
 {
     QDomNode n=m_docElem.firstChild();
     QString temp;
+    QString header;
     while (!n.isNull ())
     {
        if (n.isElement ()) {
@@ -97,9 +98,15 @@ void InterFace::parseXml()
            else if(e.tagName () == "ProjectProperties")
            {
                temp = e.attribute("ImageRootFolder");
+
                temp.replace("\\", "/");
-               pSetting->setImgPath(pSetting->getRootPath()+temp);
+               header = temp.left(2);
+               if(header == "./")
+               {
+                  temp.replace("./", "");
+               }
                pSetting->setImgRelativePath(temp);
+               pSetting->setImgPath(pSetting->getRootPath()+temp);
            }
        }
        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
@@ -265,6 +272,7 @@ void InterFace::getStringList(QDomElement enode, QString languageId,QString lang
            if(node2.toElement().tagName() == "String")
            {
               XString *string = new XString();
+              string->strNode = node2;
               string->ID = node2.toElement().attribute("ID");
               string->String = node2.toElement().text();
               string->languageID = languageId;
@@ -337,6 +345,8 @@ bool InterFace::copyFileToPath(QString sourceDir ,QString toDir, bool coverFileI
         return true;
     }
     if (!QFile::exists(sourceDir)){
+        qDebug()<<sourceDir;
+        qDebug()<<"can not find file !";
         return false;
     }
     QDir *createfile     = new QDir;
@@ -349,6 +359,9 @@ bool InterFace::copyFileToPath(QString sourceDir ,QString toDir, bool coverFileI
 
     if(!QFile::copy(sourceDir, toDir))
     {
+        qDebug()<<"copy fail";
+        qDebug()<<sourceDir;
+        qDebug()<<toDir;
         return false;
     }
     return true;
@@ -1367,3 +1380,123 @@ void  InterFace::cloneWndAttr(Menu_Wnd *wnd, CNode cnode, CNode _CopyNode)
     }
 }
 
+QString InterFace::getWinIamgeId(Menu_Wnd *wnd, ITEM_STATUS status)
+{
+    QDomNode n = wnd->node.firstChild();
+    while (!n.isNull ())
+    {
+       if (n.isElement ())
+       {
+           QDomElement e = n.toElement ();
+           if(e.tagName () == "StaticWndProperties")
+           {
+               if(status == ST_NOMAL)
+               {
+                   return e.toElement().attribute("NormalBitmapID");
+               }else if(status == ST_FOCUS)
+               {
+                   return e.toElement().attribute("FocusBitmapID");
+               }else if(status == ST_DISABLE)
+               {
+                   return e.toElement().attribute("DisabledBitmapID");
+               }
+           }
+       }
+       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
+
+    }
+    return "";
+}
+
+void InterFace::setWinIamgeId(Menu_Wnd *wnd, QString imgID, ITEM_STATUS status)
+{
+    QDomNode n = wnd->node.firstChild();
+    while (!n.isNull ())
+    {
+       if (n.isElement ())
+       {
+           QDomElement e = n.toElement ();
+           if(e.tagName () == "StaticWndProperties")
+           {
+               if(status == ST_NOMAL)
+               {
+                   e.toElement().setAttribute("NormalBitmapID", imgID);
+               }else if(status == ST_FOCUS)
+               {
+                   e.toElement().setAttribute("FocusBitmapID", imgID);
+               }else if(status == ST_DISABLE)
+               {
+                   e.toElement().setAttribute("DisabledBitmapID", imgID);
+               }
+           }
+       }
+       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
+
+    }
+}
+
+
+
+bool InterFace::isCheckImgFromID(QString imgID)
+{
+    foreach (XImg *img, ImgList) {
+        if(img->ID == imgID)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool InterFace::removeImg(XImg *img)
+{
+    img->imgNode.parentNode().removeChild(img->imgNode);
+    ImgList.removeOne(img);
+
+    return true;
+}
+
+QString InterFace::getWinStrId(Menu_Wnd *wnd)
+{
+    QDomNode n = wnd->node.firstChild();
+    while (!n.isNull ())
+    {
+       if (n.isElement ())
+       {
+           QDomElement e = n.toElement ();
+
+           if(e.tagName () == "Text")
+           {
+                return e.toElement().attribute("TextID");
+           }
+       }
+       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
+
+    }
+    return "";
+}
+void InterFace::setWinStrId(Menu_Wnd *wnd, QString imgID)
+{
+    QDomNode n = wnd->node.firstChild();
+    while (!n.isNull ())
+    {
+       if (n.isElement ())
+       {
+           QDomElement e = n.toElement ();
+           if(e.tagName () == "Text")
+           {
+                e.toElement().setAttribute("TextID",imgID);
+           }
+       }
+       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
+
+    }
+}
+
+bool InterFace::removeStr(XString *str)
+{
+    str->strNode.parentNode().removeChild(str->strNode);
+    StringList.removeOne(str);
+
+    return true;
+}

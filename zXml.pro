@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     setting.cpp \
     xlabel.cpp \
     dialogui.cpp \
-    interface.cpp
+    interface.cpp \
+    dialogimageclone.cpp \
+    dialogclean.cpp
 
 HEADERS  += xmlexample.h \
     zxml.h \
@@ -27,10 +29,14 @@ HEADERS  += xmlexample.h \
     setting.h \
     xlabel.h \
     dialogui.h \
-    interface.h
+    interface.h \
+    dialogimageclone.h \
+    dialogclean.h
 
 FORMS    += xmlexample.ui \
-    dialogui.ui
+    dialogui.ui \
+    dialogimageclone.ui \
+    dialogclean.ui
 
 DISTFILES += \
     skin.png

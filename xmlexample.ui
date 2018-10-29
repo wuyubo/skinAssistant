@@ -1058,6 +1058,8 @@ RIGHT</string>
    <addaction name="action"/>
    <addaction name="action_save"/>
    <addaction name="action_switch"/>
+   <addaction name="action_imageClone"/>
+   <addaction name="action_clean"/>
    <addaction name="action_align_left"/>
    <addaction name="action_alignCenter1"/>
    <addaction name="action_alignright"/>
@@ -1143,6 +1145,19 @@ RIGHT</string>
   <action name="action_size">
    <property name="text">
     <string>设置大小</string>
+   </property>
+  </action>
+  <action name="action_imageClone">
+   <property name="text">
+    <string>图片克隆</string>
+   </property>
+  </action>
+  <action name="action_clean">
+   <property name="text">
+    <string>XML整理</string>
+   </property>
+   <property name="toolTip">
+    <string>XML整理</string>
    </property>
   </action>
  </widget>
