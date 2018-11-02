@@ -152,6 +152,8 @@ private slots:
 
     void on_action_clean_triggered();
 
+    void on_ptn_show_hide_clicked();
+
 signals:
     void refreshUI_sig();
 private:

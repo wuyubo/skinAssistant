@@ -66,6 +66,7 @@ void InterFace::parseXml()
     QDomNode n=m_docElem.firstChild();
     QString temp;
     QString header;
+    bool ok;
     while (!n.isNull ())
     {
        if (n.isElement ()) {
@@ -87,6 +88,12 @@ void InterFace::parseXml()
                        }
                    }
                }
+           }
+           else if(e.tagName () == "SizePanel")
+           {
+                setWidth(e.attribute("Width").toInt(&ok));
+                setHeight(e.attribute("Height").toInt(&ok));
+
            }
            else if(e.tagName () == "ImageList")
            {
@@ -1060,6 +1067,27 @@ Menu_Wnd *InterFace::getWndFromId(QString ID)
     }
     return NULL;
 }
+
+void InterFace::setWidth(int w)
+{
+    ui_width = w;
+}
+
+int InterFace::getWidth()
+{
+    return ui_width;
+}
+
+void InterFace::setHeight(int h)
+{
+    ui_height = h;
+}
+
+int InterFace::getHeight()
+{
+    return ui_height;
+}
+
 ///////////////////
 /// \brief InterFace::cloneNode
 /// \param node

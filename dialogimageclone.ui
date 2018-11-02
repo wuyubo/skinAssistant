@@ -98,6 +98,19 @@
     <string>生成二维数组</string>
    </property>
   </widget>
+  <widget class="QRadioButton" name="rbn_rev">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>120</y>
+     <width>115</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>反转</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

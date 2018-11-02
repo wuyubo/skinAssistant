@@ -19,6 +19,7 @@ public:
     explicit DialogImageClone(InterFace *_pinterface, QWidget *parent = 0);
     ~DialogImageClone();
     bool CloneImage(XImg *img);
+    bool copyImage(QString sourceImg ,QString toImg);
 
 private slots:
     void on_pushButton_clicked();

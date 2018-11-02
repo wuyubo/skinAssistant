@@ -133,7 +133,8 @@ void xmlExample::initTreeWidget()
 //treeItemChanged(QTreeWidgetItem *item, int column)的实现
 void xmlExample::treeItemChanged(QTreeWidgetItem *item, int column)
 {
-  /*  Menu_Wnd *wnd = getMenu_node(item);
+    /*
+    Menu_Wnd *wnd = getMenu_node(item);
     column = column;
     if(item->checkState(0)==Qt::Checked)
     {
@@ -141,9 +142,9 @@ void xmlExample::treeItemChanged(QTreeWidgetItem *item, int column)
     }else
     {
         hideWndFromUi(wnd);
-    }*/
-    /*
-    QString itemText=item->text(0);
+    }
+    */
+   /* QString itemText=item->text(0);
     column = column;
     //选中时
     if(Qt::Checked==item->checkState(0))
@@ -1593,4 +1594,52 @@ void xmlExample::on_action_imageClone_triggered()
 void xmlExample::on_action_clean_triggered()
 {
     pDialogClean->show();
+}
+
+void xmlExample::on_ptn_show_hide_clicked()
+{
+    QTreeWidgetItem * item = ui->menu_tree->currentItem();
+    if(Qt::Checked==item->checkState(0))
+    {
+        item->setCheckState(0,Qt::Unchecked);
+    }
+    else if(Qt::Unchecked==item->checkState(0))
+    {
+        item->setCheckState(0,Qt::Checked);
+    }
+    //选中时
+    if(Qt::Checked==item->checkState(0))
+    {
+       // QTreeWidgetItem* parent=item->parent();
+        int count=item->childCount();
+        if(count>0)
+        {
+            for(int i=0;i<count;i++)
+            {
+                //子节点也被选中
+                item->child(i)->setCheckState(0,Qt::Checked);
+            }
+        }
+        else
+        {
+            //是子节点
+            updateParentItem(item);
+        }
+    }
+    else if(Qt::Unchecked==item->checkState(0))
+    {
+        int count=item->childCount();
+        if(count>0)
+        {
+            for(int i=0;i<count;i++)
+            {
+                item->child(i)->setCheckState(0,Qt::Unchecked);
+            }
+        }
+        else
+        {
+            //是子节点
+            updateParentItem(item);
+        }
+    }
 }

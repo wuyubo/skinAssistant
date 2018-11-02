@@ -28,6 +28,16 @@ void DialogImageClone::on_pushButton_clicked()
     temp.sprintf("克隆完成: 成功 %d 张，失败 %d 张！", count,pinterface->ImgList.length()-count);
     ui->lb_tip->setText(temp);
 }
+bool DialogImageClone::copyImage(QString sourceImg ,QString toImg)
+{
+    QImage image(sourceImg);
+    if(ui->rbn_rev->isChecked())
+    {
+        image = image.mirrored(true, false);
+    }
+    return image.save(toImg);
+}
+
 bool DialogImageClone::CloneImage(XImg *img)
 {
     QString filepath;
@@ -67,7 +77,12 @@ bool DialogImageClone::CloneImage(XImg *img)
         //qDebug() << targetFolder;
         dir.mkdir(targetFolder); //创建文件夹
     }
-   return pinterface->copyFileToPath(filepath, targetPath, true);
+    if(copyImage(filepath, targetPath))
+    {
+        return true;
+    }
+    qDebug() << filepath;
+    return false;
 }
 
 void DialogImageClone::on_pushButton_2_clicked()

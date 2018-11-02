@@ -7,12 +7,37 @@ DialogUI::DialogUI(InterFace *_pinterface, QWidget *parent) :
 {
     ui->setupUi(this);
     pinterface = _pinterface;
+    QLabel *plb = ui->label;//new QLabel(ui->groupBox);
+    plb->setGeometry(100,100, 100, 100);
+    QPixmap src("T:/code/Nos/tcl_3683/tcl_ui/osd_resource/bitmap1920x1080x565/menu/mainmenu_time_normal.png");//QPixmap src;   src.load(fileName);
+    plb->setPixmap(src.scaled(plb->size()));
+    plb->show();
 }
 
 DialogUI::~DialogUI()
 {
     delete ui;
 }
+
+int DialogUI::getUIx(int _x)
+{
+    return (int)_x*map_width;
+}
+int DialogUI::getUIy(int _y)
+{
+    return (int)_y*map_height;
+}
+
+int DialogUI::getUIh(int _h)
+{
+    return (int)_h*map_height;
+}
+int DialogUI::getUIw(int _w)
+{
+     return (int)_w*map_width;
+}
+
+
 
 void DialogUI::showWndToUi(Menu_Wnd *wnd)
 {
@@ -21,9 +46,8 @@ void DialogUI::showWndToUi(Menu_Wnd *wnd)
 
     if(wnd->label == NULL)
     {
-        wnd->label = new XLabel(ui->groupBox);
+        wnd->label = new QLabel(ui->groupBox);
     }
-    //wnd->label->setParent(ui->groupBox);
     while (!n.isNull ())
     {
        if (n.isElement ())
@@ -32,10 +56,10 @@ void DialogUI::showWndToUi(Menu_Wnd *wnd)
 
            if(e.tagName () == "Position")
            {
-                wnd->label->setGeometry(e.toElement().attribute("X").toInt(&ok),
-                                        e.toElement().attribute("Y").toInt(&ok),
-                                        e.toElement().attribute("Width").toInt(&ok),
-                                        e.toElement().attribute("Height").toInt(&ok));
+                wnd->label->setGeometry(getUIx(e.toElement().attribute("X").toInt(&ok)),
+                                        getUIy(e.toElement().attribute("Y").toInt(&ok)),
+                                        getUIw(e.toElement().attribute("Width").toInt(&ok)),
+                                        getUIh(e.toElement().attribute("Height").toInt(&ok)));
            }
            if(e.tagName() == "Text")
            {
@@ -62,6 +86,7 @@ void DialogUI::showWndToUi(Menu_Wnd *wnd)
                     }
                     wnd->label->setStyleSheet("font: 75 12pt '微软雅黑';");
                     wnd->label->setText(pinterface->getString(e.toElement().attribute("TextID"), "English"));
+                    qDebug()<< pinterface->getString(e.toElement().attribute("TextID"), "English");
                 }
 
            }
@@ -78,7 +103,7 @@ void DialogUI::showWndToUi(Menu_Wnd *wnd)
                         showCloneStaticWndProperties(wnd, w);
                     }
 
-                }/*else if(state == "1")
+                }else if(state == "1")
                 {
                     wnd->label->setPixmap(QPixmap(""));
                     if(e.toElement().attribute("HasNormalDrawStyle") == "1")
@@ -90,19 +115,19 @@ void DialogUI::showWndToUi(Menu_Wnd *wnd)
                     {
                         wnd->label->setStyleSheet("");
                     }
-                }*/
+                }
                 else if(state == "2")
                 {
                     showIconFromId(e.toElement().attribute("NormalBitmapID"), wnd->label);
 
                 }
-
-
            }
        }
        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
 
     }
+    wnd->label->raise();
+    wnd->label->setWindowFlags(Qt::WindowStaysOnTopHint);
     wnd->label->show();
     wnd->isShow = true;
 }
@@ -118,7 +143,8 @@ void DialogUI::hideWndFromUi(Menu_Wnd *wnd)
 
 void DialogUI::refreshWndFromUi(Menu_Wnd *wnd)
 {
-
+    map_width = (float)UI_WIDTH/(float)pinterface->getWidth();
+    map_height = (float)UI_HEIGHT/(float)pinterface->getHeight();
     if(Qt::Checked == wnd->item->checkState(0))
     {
         showWndToUi(wnd);
@@ -225,7 +251,7 @@ void DialogUI::showCloneStaticWndProperties(Menu_Wnd *show_wnd, Menu_Wnd *wnd)
      }
 }
 
-void DialogUI::showIconFromId(QString ID, XLabel *lb_icon)
+void DialogUI::showIconFromId(QString ID, QLabel *lb_icon)
 {
     //qDebug() << ID;
     foreach(XImg * img, pinterface->ImgList)
@@ -237,7 +263,7 @@ void DialogUI::showIconFromId(QString ID, XLabel *lb_icon)
     }
 }
 
-void DialogUI::showIcon(XImg *img, XLabel *lb_icon)
+void DialogUI::showIcon(XImg *img, QLabel *lb_icon)
 {
     QString filepath;
     QString folder = img->FolderName.replace("\\", "/");

@@ -29,7 +29,7 @@ typedef struct Menu_Wnd{
     struct Menu_Wnd *lbroher;
     struct Menu_Wnd *rbroher;
     bool isMainFrame;
-    XLabel *label;
+    QLabel *label;
     bool isShow;
 }XMenu_Wnd;
 
@@ -115,6 +115,10 @@ public:
     QDomElement getChildNode(QDomElement node, QString childName);
     void removeChild(Menu_Wnd *wnd);
     Menu_Wnd *getWndFromId(QString ID);
+    void setWidth(int w);
+    int getWidth();
+    void setHeight(int h);
+    int getHeight();
     /////////////
    // void cloneNode(QDomNode node, QDomNode cnode);
    // void cloneTree(Menu_Wnd * wnd, Menu_Wnd * ctree);
@@ -144,6 +148,8 @@ public:
     QList<XString *>  StringList;
     QStringList frameList;
     QString curframe;
+    int ui_width;
+    int ui_height;
 };
 
 #endif // INTERFACE_H

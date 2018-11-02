@@ -3,7 +3,7 @@
  <class>DialogUI</class>
  <widget class="QDialog" name="DialogUI">
   <property name="enabled">
-   <bool>false</bool>
+   <bool>true</bool>
   </property>
   <property name="geometry">
    <rect>
@@ -17,6 +17,9 @@
    <string>Dialog</string>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>1030</x>
@@ -33,6 +36,9 @@
    </property>
   </widget>
   <widget class="QGroupBox" name="groupBox">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -45,12 +51,15 @@
     <string>GroupBox</string>
    </property>
    <widget class="QLabel" name="label">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>30</y>
+      <x>650</x>
+      <y>410</y>
       <width>101</width>
-      <height>111</height>
+      <height>91</height>
      </rect>
     </property>
     <property name="text">
