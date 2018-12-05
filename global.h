@@ -6,6 +6,8 @@
 
 #define XML_PATH  "./"
 
+#define DEBUG(x) (qDebug()<<x)
+
 #define SETTING_FILE "./setting.ini"
 typedef enum
 {

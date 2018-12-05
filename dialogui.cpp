@@ -1,17 +1,13 @@
 #include "dialogui.h"
 #include "ui_dialogui.h"
-
+#define UIDEBUG(x) //DEBUG(x)
 DialogUI::DialogUI(InterFace *_pinterface, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogUI)
 {
     ui->setupUi(this);
     pinterface = _pinterface;
-    QLabel *plb = ui->label;//new QLabel(ui->groupBox);
-    plb->setGeometry(100,100, 100, 100);
-    QPixmap src("T:/code/Nos/tcl_3683/tcl_ui/osd_resource/bitmap1920x1080x565/menu/mainmenu_time_normal.png");//QPixmap src;   src.load(fileName);
-    plb->setPixmap(src.scaled(plb->size()));
-    plb->show();
+    ui->rbn_focus->setChecked(true);
 }
 
 DialogUI::~DialogUI()
@@ -36,18 +32,97 @@ int DialogUI::getUIw(int _w)
 {
      return (int)_w*map_width;
 }
+///////////////////////////////////////////////
+/// \brief DialogUI::showWndToUi
+/// \param wnd
+//////////////////////////////////////
+///
+void DialogUI::setWPostion(Menu_Wnd *wnd, int _x, int _y, int _w, int _h)
+{
+    if(wnd->label == NULL)
+    {
+        return;
+    }
+    wnd->label->setGeometry(_x, _y, _w, _h);
+}
+void DialogUI::setWText(Menu_Wnd *wnd, QString text, QPalette *pcolor, ALIGN_MODE align, FONT_SIZE size )
+{
+    if(wnd->label == NULL)
+    {
+        return;
+    }
+    wnd->label->setText(text);
+    wnd->label->setPalette(*pcolor);
+    switch (align) {
+    case ALIGN_LEFT:
+        wnd->label->setAlignment(Qt::AlignLeft);
+        break;
+    case ALIGN_RIGHT:
+        wnd->label->setAlignment(Qt::AlignRight);
+        break;
+    case ALIGN_CENTER:
+        wnd->label->setAlignment(Qt::AlignCenter);
+        break;
+    default:
+        break;
+    }
 
+    switch (size) {
+    case FONT_BIG:
+        wnd->label->setStyleSheet("font: 100 12pt '微软雅黑';");
+        break;
+    case FONT_NORMAL:
+        wnd->label->setStyleSheet("font: 75 12pt '微软雅黑';");
+        break;
+    case FONT_SMALL:
+        wnd->label->setStyleSheet("font: 45 12pt '微软雅黑';");
+        break;
+    default:
+        break;
+    }
 
+    // qDebug()<< text;
 
+}
+
+void DialogUI::setWBackground(Menu_Wnd *wnd, BG_TYPE type, QString color, QString image, Menu_Wnd *cloneWnd)
+{
+    if(wnd->label == NULL)
+    {
+        return;
+    }
+    switch (type) {
+    case BG_CLONE:
+        if(cloneWnd != NULL)
+        {
+            showCloneStaticWndProperties(wnd, cloneWnd);
+        }
+        break;
+    case BG_COLOR:
+        wnd->label->setStyleSheet(color);
+        break;
+    case BG_IAMGE:
+        showIconFromId(image, wnd->label);
+        break;
+    default:
+        break;
+    }
+
+}
+
+//////////////////////////////////////////////////
 void DialogUI::showWndToUi(Menu_Wnd *wnd)
 {
     QDomNode n = wnd->node.firstChild();
+    bool isText = false;
     bool ok;
-
     if(wnd->label == NULL)
     {
         wnd->label = new QLabel(ui->groupBox);
     }
+    UIDEBUG(wnd->node.toElement().attribute("Name"));
+
+
     while (!n.isNull ())
     {
        if (n.isElement ())
@@ -56,80 +131,132 @@ void DialogUI::showWndToUi(Menu_Wnd *wnd)
 
            if(e.tagName () == "Position")
            {
-                wnd->label->setGeometry(getUIx(e.toElement().attribute("X").toInt(&ok)),
-                                        getUIy(e.toElement().attribute("Y").toInt(&ok)),
-                                        getUIw(e.toElement().attribute("Width").toInt(&ok)),
-                                        getUIh(e.toElement().attribute("Height").toInt(&ok)));
+                setWPostion(wnd,getUIx(e.toElement().attribute("X").toInt(&ok)),
+                            getUIy(e.toElement().attribute("Y").toInt(&ok)),
+                            getUIw(e.toElement().attribute("Width").toInt(&ok)),
+                            getUIh(e.toElement().attribute("Height").toInt(&ok)));
+
            }
+#if 1
            if(e.tagName() == "Text")
            {
                 if(e.toElement().attribute("TextID")!= "")
                 {
                     QString color = e.toElement().attribute("NormalTextColor");
+                    QString text = pinterface->getString(e.toElement().attribute("TextID"), "English");
+                    ALIGN_MODE tAlign = ALIGN_NORMAL;
+
+                    if(ui->rbn_normal->isChecked())
+                    {
+                        color =e.toElement().attribute("NormalTextColor");
+                    }else if(ui->rbn_focus->isChecked())
+                    {
+                        color = e.toElement().attribute("FocusTextColor");
+                    }else if(ui->rbn_disable->isChecked())
+                    {
+                        color = e.toElement().attribute("DisableTextColor");
+                    }
+
                     color.replace("#", "");
                     QPalette pa;
                     pa.setColor(QPalette::WindowText,QColor(QRgb(color.toInt(&ok,16))));
-                    wnd->label->setPalette(pa);
+
+
 
                     QString align = e.toElement().attribute("TextAlign");
                     if(align == "0")
                     {
-                        wnd->label->setAlignment(Qt::AlignLeft);
+                        tAlign = ALIGN_LEFT;
                     }
                     else if(align == "3")
                     {
-                        wnd->label->setAlignment(Qt::AlignCenter);
+                        tAlign = ALIGN_CENTER;
                     }
                     else if(align == "2")
                     {
-                        wnd->label->setAlignment(Qt::AlignRight);
+                        tAlign = ALIGN_RIGHT;
                     }
-                    wnd->label->setStyleSheet("font: 75 12pt '微软雅黑';");
-                    wnd->label->setText(pinterface->getString(e.toElement().attribute("TextID"), "English"));
-                    qDebug()<< pinterface->getString(e.toElement().attribute("TextID"), "English");
+
+                    setWText(wnd, text, &pa, tAlign);
+
+                    isText = true;
                 }
 
            }
-           if(e.tagName () == "StaticWndProperties")
+           if(e.tagName () == "StaticWndProperties" && !isText)
            {
                 QString state = e.toElement().attribute("BgState");
-
+                //wnd->label->setPixmap(QPixmap(""));
                 if(state == "0")
                 {
                     QString clone = e.toElement().attribute("Clone");
-                    Menu_Wnd *w = pinterface->getWndFromId(clone);
-                    if(w != NULL)
+                    if(clone != "")
                     {
-                        showCloneStaticWndProperties(wnd, w);
+                        Menu_Wnd *w = pinterface->getWndFromId(clone);
+                        setWBackground(wnd, BG_CLONE, NULL, NULL, w);
+
                     }
 
                 }else if(state == "1")
                 {
-                    wnd->label->setPixmap(QPixmap(""));
-                    if(e.toElement().attribute("HasNormalDrawStyle") == "1")
+                    QString color = "";
+
+                    if(ui->rbn_normal->isChecked())
                     {
-                        QString color = e.toElement().attribute("NormalBgColor");
-                        color = "background-color:"+color;
-                        wnd->label->setStyleSheet(color);
-                    }else
+                        if(e.toElement().attribute("HasNormalDrawStyle") == "1")
+                        {
+                            color = e.toElement().attribute("NormalBgColor");
+                            color = "background-color:"+color;
+                            setWBackground(wnd, BG_COLOR, color);
+                        }
+                    }else if(ui->rbn_focus->isChecked())
                     {
-                        wnd->label->setStyleSheet("");
+                        if(e.toElement().attribute("HasFocusDrawStyle") == "1")
+                        {
+                            color = e.toElement().attribute("FocusBgColor");
+                            color = "background-color:"+color;
+                            setWBackground(wnd, BG_COLOR, color);
+                        }
+                    }else if(ui->rbn_disable->isChecked())
+                    {
+                        if(e.toElement().attribute("HasDisabledDrawStyle") == "1")
+                        {
+                            color = e.toElement().attribute("DisabledBgColor");
+                            color = "background-color:"+color;
+                            setWBackground(wnd, BG_COLOR, color);
+                        }
                     }
                 }
                 else if(state == "2")
                 {
-                    showIconFromId(e.toElement().attribute("NormalBitmapID"), wnd->label);
+                    QString img = "";
+                    if(ui->rbn_normal->isChecked())
+                    {
+                        img = e.toElement().attribute("NormalBitmapID");
+                    }else if(ui->rbn_focus->isChecked())
+                    {
+                        img = e.toElement().attribute("FocusBitmapID");
+                    }else if(ui->rbn_disable->isChecked())
+                    {
+                       img = e.toElement().attribute("DisabledBitmapID");
+                    }
 
+                    if(img != "")
+                    {
+                        setWBackground(wnd, BG_IAMGE, NULL, e.toElement().attribute("NormalBitmapID"));
+                    }
                 }
            }
+#endif
        }
        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
+       isText = false;
 
     }
+
     wnd->label->raise();
     wnd->label->setWindowFlags(Qt::WindowStaysOnTopHint);
     wnd->label->show();
-    wnd->isShow = true;
 }
 
 void DialogUI::hideWndFromUi(Menu_Wnd *wnd)
@@ -137,79 +264,11 @@ void DialogUI::hideWndFromUi(Menu_Wnd *wnd)
      if(wnd->label != NULL)
      {
          wnd->label->hide();
-         wnd->isShow = false;
      }
 }
 
-void DialogUI::refreshWndFromUi(Menu_Wnd *wnd)
-{
-    map_width = (float)UI_WIDTH/(float)pinterface->getWidth();
-    map_height = (float)UI_HEIGHT/(float)pinterface->getHeight();
-    if(Qt::Checked == wnd->item->checkState(0))
-    {
-        showWndToUi(wnd);
-    }
-    else
-    {
-        hideWndFromUi(wnd);
-    }
-}
 
 
-void DialogUI::showTreetoUI(Menu_Wnd *w)
-{
-    qDebug()<<""<<w->frame;
-    refreshWndFromUi(w);
-
-    while(w != w->rbroher)
-    {
-        w = w->rbroher;
-        refreshWndFromUi(w);
-        if((w->firstChild != w))
-        {
-            if((w->isShow))
-            {
-                showTreetoUI(w->firstChild);
-            }else
-            {
-                hideTreeFromUI(w->firstChild);
-            }
-        }
-
-    }
-}
-void DialogUI::hideTreeFromUI(Menu_Wnd *w)
-{
-    hideWndFromUi(w);
-    while(w != w->rbroher)
-    {
-        w = w->rbroher;
-        hideWndFromUi(w);
-        if(w->firstChild != w)
-        {
-            hideTreeFromUI(w->firstChild);
-        }
-    }
-}
-
-void DialogUI::refreshUI()
-{
-    foreach(Menu_Wnd * wnd, pinterface->menuWndList)
-    {
-        if(wnd->node.toElement().attribute("CtrlTypeName") == "Main Frame")
-        {
-            if(wnd->frame == pinterface->getCurframe())
-            {
-                showTreetoUI(wnd);
-            }else
-            {
-               hideTreeFromUI(wnd);
-
-            }
-        }
-    }
-
-}
 
 void DialogUI::showCloneStaticWndProperties(Menu_Wnd *show_wnd, Menu_Wnd *wnd)
 {
@@ -228,22 +287,52 @@ void DialogUI::showCloneStaticWndProperties(Menu_Wnd *show_wnd, Menu_Wnd *wnd)
 
                 }else if(state == "1")
                 {
-                    wnd->label->setPixmap(QPixmap(""));
-                    if(e.toElement().attribute("HasNormalDrawStyle") == "1")
-                    {
-                        QString color = e.toElement().attribute("NormalBgColor");
-                        color = "background-color:"+color;
-                        show_wnd->label->setStyleSheet(color);
-                    }else
-                    {
-                        show_wnd->label->setStyleSheet("");
-                    }
+                    QString color = "";
 
+                    if(ui->rbn_normal->isChecked())
+                    {
+                        if(e.toElement().attribute("HasNormalDrawStyle") == "1")
+                        {
+                            color = e.toElement().attribute("NormalBgColor");
+                            color = "background-color:"+color;
+                            setWBackground(show_wnd, BG_COLOR, color);
+                        }
+                    }else if(ui->rbn_focus->isChecked())
+                    {
+                        if(e.toElement().attribute("HasFocusDrawStyle") == "1")
+                        {
+                            color = e.toElement().attribute("FocusBgColor");
+                            color = "background-color:"+color;
+                            setWBackground(show_wnd, BG_COLOR, color);
+                        }
+                    }else if(ui->rbn_disable->isChecked())
+                    {
+                        if(e.toElement().attribute("HasDisabledDrawStyle") == "1")
+                        {
+                            color = e.toElement().attribute("DisabledBgColor");
+                            color = "background-color:"+color;
+                            setWBackground(show_wnd, BG_COLOR, color);
+                        }
+                    }
                 }
                 else if(state == "2")
                 {
-                    showIconFromId(e.toElement().attribute("NormalBitmapID"), show_wnd->label);
+                    QString img = "";
+                    if(ui->rbn_normal->isChecked())
+                    {
+                        img = e.toElement().attribute("NormalBitmapID");
+                    }else if(ui->rbn_focus->isChecked())
+                    {
+                        img = e.toElement().attribute("FocusBitmapID");
+                    }else if(ui->rbn_disable->isChecked())
+                    {
+                       img = e.toElement().attribute("DisabledBitmapID");
+                    }
 
+                    if(img != "")
+                    {
+                        setWBackground(show_wnd, BG_IAMGE, NULL, e.toElement().attribute("NormalBitmapID"));
+                    }
                 }
             }
         }
@@ -276,9 +365,38 @@ void DialogUI::showIcon(XImg *img, QLabel *lb_icon)
     {
         filepath = pinterface->pSetting->getImgPath()+img->FolderName.replace("\\", "/")+"/"+img->FileName;
     }
-    qDebug() << filepath;
+    //qDebug() << filepath;
     QPixmap src(filepath);//QPixmap src;   src.load(fileName);
-   // ui->label->setPixmap(src.scaled(lb_icon->size()));
     lb_icon->setPixmap(src.scaled(lb_icon->size()));//若改变图像适应label，则 ui->label->setPixmap(src.scaled(ui->label->size()));
 }
 
+
+void DialogUI::refreshUI()
+{
+    map_width = (float)UI_WIDTH/(float)pinterface->getWidth();
+    map_height = (float)UI_HEIGHT/(float)pinterface->getHeight();
+    foreach(Menu_Wnd * wnd, pinterface->menuWndList)
+    {
+        if(wnd->frame != pinterface->getCurframe())
+        {
+            wnd->isShow = false;
+        }
+
+        if(wnd->parent->isShow && wnd->isShow)
+        {
+            showWndToUi(wnd);
+        }else
+        {
+            hideWndFromUi(wnd);
+        }
+
+    }
+
+}
+
+
+
+void DialogUI::on_ptn_refresh_clicked()
+{
+    refreshUI();
+}

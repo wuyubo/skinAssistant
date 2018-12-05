@@ -133,54 +133,19 @@ void xmlExample::initTreeWidget()
 //treeItemChanged(QTreeWidgetItem *item, int column)的实现
 void xmlExample::treeItemChanged(QTreeWidgetItem *item, int column)
 {
-    /*
-    Menu_Wnd *wnd = getMenu_node(item);
+    Menu_Wnd *wnd = pinterface->getMenu_node(item);
     column = column;
+    if(wnd == NULL)
+    {
+        return;
+    }
     if(item->checkState(0)==Qt::Checked)
     {
-        showTreetoUI(wnd);
+        wnd->isShow = true;
     }else
     {
-        hideWndFromUi(wnd);
+        wnd->isShow = false;
     }
-    */
-   /* QString itemText=item->text(0);
-    column = column;
-    //选中时
-    if(Qt::Checked==item->checkState(0))
-    {
-        QTreeWidgetItem* parent=item->parent();
-        int count=item->childCount();
-        if(count>0)
-        {
-            for(int i=0;i<count;i++)
-            {
-                //子节点也被选中
-                item->child(i)->setCheckState(0,Qt::Checked);
-            }
-        }
-        else
-        {
-            //是子节点
-            updateParentItem(item);
-        }
-    }
-    else if(Qt::Unchecked==item->checkState(0))
-    {
-        int count=item->childCount();
-        if(count>0)
-        {
-            for(int i=0;i<count;i++)
-            {
-                item->child(i)->setCheckState(0,Qt::Unchecked);
-            }
-        }
-        else
-        {
-            //是子节点
-            updateParentItem(item);
-        }
-    }*/
 }
 
 //updateParentItem(QTreeWidgetItem *item) 的实现
@@ -288,6 +253,10 @@ void xmlExample::showWndAttr(Menu_Wnd *wnd)
                 ui->le_NormColor->setText(e.toElement().attribute("NormalTextColor"));
                 ui->le_FocColor->setText(e.toElement().attribute("FocusTextColor"));
                 ui->le_disColor->setText(e.toElement().attribute("DisableTextColor"));
+                ui->le_font_size_0->setText(e.toElement().attribute("FontTypeIndex"));
+                ui->le_font_size_1->setText(e.toElement().attribute("FocusFontTypeIndex"));
+                ui->le_font_size_2->setText(e.toElement().attribute("DisableFontTypeIndex"));
+
                 if(ui->le_text->text() != "")
                 {
                     ui->lb_img->setText(pinterface->getString(ui->le_text->text(), "English"));
@@ -296,7 +265,7 @@ void xmlExample::showWndAttr(Menu_Wnd *wnd)
            if(e.tagName () == "StaticWndProperties")
            {
                 QString state = e.toElement().attribute("BgState");
-                QString color_Nomal = e.toElement().attribute("HasNormalText");
+                QString color_Nomal = e.toElement().attribute("HasNormalDrawStyle");
                 QString color_Focus = e.toElement().attribute("HasFocusDrawStyle");
                 QString color_Disble = e.toElement().attribute("HasDisableDrawStyle");
                 ui->le_clone->setText(e.toElement().attribute("Clone"));
@@ -311,14 +280,23 @@ void xmlExample::showWndAttr(Menu_Wnd *wnd)
                 if(color_Nomal == "1")
                 {
                     ui->cb_bg_nomal->setChecked(true);
+                }else
+                {
+                    ui->cb_bg_nomal->setChecked(false);
                 }
                 if(color_Focus == "1")
                 {
                     ui->cb_bg_focus->setChecked(true);
+                }else
+                {
+                    ui->cb_bg_focus->setChecked(false);
                 }
                 if(color_Disble == "1")
                 {
                     ui->cb_bg_disble->setChecked(true);
+                }else
+                {
+                    ui->cb_bg_disble->setChecked(false);
                 }
                 ui->lb_img->setPixmap(QPixmap(""));
                 if(state == "0")
@@ -1353,6 +1331,10 @@ void xmlExample::copyWndAttr(Menu_Wnd *wnd)
                 m_CopyNode.text.NormalTextColor = e.toElement().attribute("NormalTextColor");
                 m_CopyNode.text.FocusTextColor = e.toElement().attribute("FocusTextColor");
                 m_CopyNode.text.DisableTextColor = e.toElement().attribute("DisableTextColor");
+                m_CopyNode.text.FontTypeNormal = e.toElement().attribute("FontTypeIndex");
+                m_CopyNode.text.FontTypeFocus = e.toElement().attribute("FocusFontTypeIndex");
+                m_CopyNode.text.FontTypeDisbale = e.toElement().attribute("DisableFontTypeIndex");
+
            }
            if(e.tagName () == "StaticWndProperties" && (m_CopyNode.type == CALL || m_CopyNode.isAdvanced))
            {
@@ -1401,6 +1383,9 @@ void  xmlExample::setWndAttr(Menu_Wnd *wnd)
                 e.toElement().setAttribute("NormalTextColor", ui->le_NormColor->text());
                 e.toElement().setAttribute("FocusTextColor", ui->le_FocColor->text());
                 e.toElement().setAttribute("DisableTextColor",ui->le_disColor->text());
+                e.toElement().setAttribute("FontTypeIndex",ui->le_font_size_0->text());
+                e.toElement().setAttribute("FocusFontTypeIndex",ui->le_font_size_1->text());
+                e.toElement().setAttribute("DisableFontTypeIndex",ui->le_font_size_2->text());
            }
            if(e.tagName () == "StaticWndProperties")
            {
@@ -1596,50 +1581,51 @@ void xmlExample::on_action_clean_triggered()
     pDialogClean->show();
 }
 
-void xmlExample::on_ptn_show_hide_clicked()
+void xmlExample::ItemShowHide(QTreeWidgetItem * item, bool isShow)
 {
-    QTreeWidgetItem * item = ui->menu_tree->currentItem();
-    if(Qt::Checked==item->checkState(0))
+    int count;
+    Menu_Wnd *wnd = pinterface->getMenu_node(item);
+    if(wnd == NULL)
     {
-        item->setCheckState(0,Qt::Unchecked);
+        return;
     }
-    else if(Qt::Unchecked==item->checkState(0))
+    wnd->isShow = isShow;
+    if(isShow)
     {
         item->setCheckState(0,Qt::Checked);
-    }
-    //选中时
-    if(Qt::Checked==item->checkState(0))
-    {
-       // QTreeWidgetItem* parent=item->parent();
-        int count=item->childCount();
+        count=item->childCount();
         if(count>0)
         {
             for(int i=0;i<count;i++)
             {
                 //子节点也被选中
-                item->child(i)->setCheckState(0,Qt::Checked);
+                ItemShowHide(item->child(i), true);
             }
         }
-        else
-        {
-            //是子节点
-            updateParentItem(item);
-        }
-    }
-    else if(Qt::Unchecked==item->checkState(0))
+    }else
     {
-        int count=item->childCount();
-        if(count>0)
-        {
-            for(int i=0;i<count;i++)
-            {
-                item->child(i)->setCheckState(0,Qt::Unchecked);
-            }
-        }
-        else
-        {
-            //是子节点
-            updateParentItem(item);
-        }
+         item->setCheckState(0,Qt::Unchecked);
+         count=item->childCount();
+         if(count>0)
+         {
+             for(int i=0;i<count;i++)
+             {
+                 //子节点也被选中
+                 ItemShowHide(item->child(i), false);
+             }
+         }
     }
+}
+
+void xmlExample::on_ptn_show_hide_clicked()
+{
+    QTreeWidgetItem * item = ui->menu_tree->currentItem();
+    if(Qt::Checked==item->checkState(0))
+    {
+        ItemShowHide(item, false);
+    }else
+    {
+        ItemShowHide(item, true);
+    }
+
 }

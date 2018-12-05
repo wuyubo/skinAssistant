@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1380</width>
-    <height>803</height>
+    <width>1402</width>
+    <height>864</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
    <property name="geometry">
     <rect>
      <x>1030</x>
-     <y>770</y>
+     <y>820</y>
      <width>341</width>
      <height>32</height>
     </rect>
@@ -42,13 +42,13 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>0</y>
+     <y>50</y>
      <width>1366</width>
      <height>768</height>
     </rect>
    </property>
    <property name="title">
-    <string>GroupBox</string>
+    <string>UI</string>
    </property>
    <widget class="QLabel" name="label">
     <property name="enabled">
@@ -56,16 +56,84 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>410</y>
-      <width>101</width>
-      <height>91</height>
+      <x>0</x>
+      <y>10</y>
+      <width>1371</width>
+      <height>761</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 0, 0);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="grp_state">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>0</y>
+     <width>311</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>GroupBox</string>
+   </property>
+   <widget class="QRadioButton" name="rbn_normal">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>81</width>
+      <height>19</height>
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>Normal</string>
     </property>
    </widget>
+   <widget class="QRadioButton" name="rbn_focus">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>20</y>
+      <width>81</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Focus</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="rbn_disable">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>20</y>
+      <width>81</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Disable</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="ptn_refresh">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>20</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>刷新</string>
+   </property>
   </widget>
  </widget>
  <resources/>

@@ -1385,6 +1385,9 @@ void  InterFace::cloneWndAttr(Menu_Wnd *wnd, CNode cnode, CNode _CopyNode)
                 e.toElement().setAttribute("NormalTextColor", cnode.text.NormalTextColor);
                 e.toElement().setAttribute("FocusTextColor", cnode.text.FocusTextColor);
                 e.toElement().setAttribute("DisableTextColor",cnode.text.DisableTextColor);
+                e.toElement().setAttribute("FontTypeIndex",cnode.text.FontTypeNormal);
+                e.toElement().setAttribute("FocusFontTypeIndex",cnode.text.FontTypeFocus);
+                e.toElement().setAttribute("DisableFontTypeIndex",cnode.text.FontTypeDisbale);
            }
            if(e.tagName () == "StaticWndProperties" && (_CopyNode.type == CALL || _CopyNode.isAdvanced))
            {
@@ -1465,15 +1468,21 @@ void InterFace::setWinIamgeId(Menu_Wnd *wnd, QString imgID, ITEM_STATUS status)
 
 
 
-bool InterFace::isCheckImgFromID(QString imgID)
+QString InterFace::checkImgFromID(QString imgID, int type)
 {
+    Qt::CaseSensitivity cs = Qt::CaseSensitive;
+    if(type == 1)
+    {
+        cs = Qt::CaseInsensitive;
+    }
     foreach (XImg *img, ImgList) {
-        if(img->ID == imgID)
+        if(imgID.compare(img->ID, cs) == 0)
         {
-            return true;
+            return img->ID;
         }
     }
-    return false;
+    DEBUG(imgID);
+    return NULL;
 }
 
 bool InterFace::removeImg(XImg *img)

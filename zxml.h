@@ -39,6 +39,9 @@ typedef struct Text
     QString NormalTextColor;
     QString FocusTextColor;
     QString DisableTextColor;
+    QString FontTypeNormal;
+    QString FontTypeFocus;
+    QString FontTypeDisbale;
 }XText;
 
 typedef struct Navigation

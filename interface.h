@@ -125,7 +125,7 @@ public:
     void  cloneWndAttr(Menu_Wnd *wnd, CNode cnode, CNode _CopyNode);
     QString getWinIamgeId(Menu_Wnd *wnd, ITEM_STATUS status);
     void setWinIamgeId(Menu_Wnd *wnd, QString imgID, ITEM_STATUS status);
-    bool isCheckImgFromID(QString imgID);
+    QString checkImgFromID(QString imgID, int type = 0);
     bool removeImg(XImg *img);
     QString getWinStrId(Menu_Wnd *wnd);
     void setWinStrId(Menu_Wnd *wnd, QString imgID);

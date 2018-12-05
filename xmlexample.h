@@ -54,6 +54,7 @@ public:
   void clearCopy();
   void  copyWndAttr(Menu_Wnd *wnd);
   void  setWndAttr(Menu_Wnd *wnd);
+  void ItemShowHide(QTreeWidgetItem * item, bool isShow);
 
 public:
   void on_ptn_alignleft_clicked();

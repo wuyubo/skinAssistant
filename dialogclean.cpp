@@ -27,10 +27,10 @@ void DialogClean::on_ptn_relink_clicked()
         {
             imgID = pinterface->getWinIamgeId(wnd, ST_NOMAL);
 
-            if((imgID != "") && !pinterface->isCheckImgFromID(imgID))
+            if((imgID != "") && pinterface->checkImgFromID(imgID)==NULL)
             {
-                imgLowerID = imgID.toLower();
-                if(pinterface->isCheckImgFromID(imgLowerID))
+                imgLowerID = pinterface->checkImgFromID(imgID, 1);
+                if(imgLowerID != NULL)
                 {
                     pinterface->setWinIamgeId(wnd, imgLowerID, ST_NOMAL);
                     count++;
@@ -42,12 +42,12 @@ void DialogClean::on_ptn_relink_clicked()
                 }
             }
             imgID = pinterface->getWinIamgeId(wnd, ST_FOCUS);
-            if((imgID != "")&&!pinterface->isCheckImgFromID(imgID))
+            if((imgID != "")&&pinterface->checkImgFromID(imgID)==NULL)
             {
-                imgLowerID = imgID.toLower();
-                if(pinterface->isCheckImgFromID(imgLowerID))
+                imgLowerID = pinterface->checkImgFromID(imgID, 1);
+                if(imgLowerID != NULL)
                 {
-                    pinterface->setWinIamgeId(wnd, imgLowerID, ST_FOCUS);
+                    pinterface->setWinIamgeId(wnd, imgLowerID, ST_NOMAL);
                     count++;
                 }else
                 {
@@ -57,12 +57,12 @@ void DialogClean::on_ptn_relink_clicked()
                 }
             }
             imgID = pinterface->getWinIamgeId(wnd, ST_DISABLE);
-            if((imgID != "") && !pinterface->isCheckImgFromID(imgID))
+            if((imgID != "") && pinterface->checkImgFromID(imgID)==NULL)
             {
-                imgLowerID = imgID.toLower();
-                if(pinterface->isCheckImgFromID(imgLowerID))
+                imgLowerID = pinterface->checkImgFromID(imgID, 1);
+                if(imgLowerID != NULL)
                 {
-                    pinterface->setWinIamgeId(wnd, imgLowerID, ST_DISABLE);
+                    pinterface->setWinIamgeId(wnd, imgLowerID, ST_NOMAL);
                     count++;
                 }else
                 {
