@@ -62,7 +62,7 @@
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>180</x>
      <y>270</y>
      <width>93</width>
      <height>28</height>
@@ -108,7 +108,20 @@
     </rect>
    </property>
    <property name="text">
-    <string>反转</string>
+    <string>镜像</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ptn_addMirrorImg">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>270</y>
+     <width>121</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>添加镜像图片</string>
    </property>
   </widget>
  </widget>

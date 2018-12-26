@@ -16,6 +16,7 @@
 #include "zxml.h"
 #include <QStandardItem>
 #include <QLabel>
+#include "dialogimage.h"
 
 namespace Ui {
 class xmlExample;
@@ -45,16 +46,11 @@ public:
 
   void set_mode(OPTION_MODE mode);
 
-  void showCloneStaticWndProperties(Menu_Wnd *show_wnd, Menu_Wnd *wnd);
-  void showWndToUi(Menu_Wnd *wnd);
-  void hideWndFromUi(Menu_Wnd *wnd);
-  void refreshWndFromUi(Menu_Wnd *wnd);
-  void showTreetoUI(Menu_Wnd *wnd);
-  void hideTreeFromUI(Menu_Wnd *w);
   void clearCopy();
   void  copyWndAttr(Menu_Wnd *wnd);
   void  setWndAttr(Menu_Wnd *wnd);
   void ItemShowHide(QTreeWidgetItem * item, bool isShow);
+  void updateUI();
 
 public:
   void on_ptn_alignleft_clicked();
@@ -149,11 +145,12 @@ private slots:
     void on_action_postion_triggered();
 
     void on_action_size_triggered();
-    void on_action_imageClone_triggered();
 
     void on_action_clean_triggered();
 
     void on_ptn_show_hide_clicked();
+
+    void on_imgManager_triggered();
 
 signals:
     void refreshUI_sig();
@@ -172,8 +169,8 @@ private:
   OPTION_MODE opt_mode;
 
   DialogUI *pDialogUI;
-  DialogImageClone *pDialogImageClone;
   DialogClean *pDialogClean;
+  DialogImage *pDialgImgManager;
 
 };
 

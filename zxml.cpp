@@ -228,6 +228,10 @@ QDomElement ZXml::xmlCreateNode(QString tagName)
 {
     return m_doc.createElement(tagName);
 }
+QDomText ZXml::xmlCreateTextNode(QString textName)
+{
+    return m_doc.createTextNode(textName);
+}
 QDomAttr ZXml::xmlCreateAttribute(QString name)
 {
     return  m_doc.createAttribute(name);

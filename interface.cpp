@@ -139,11 +139,57 @@ void InterFace::GetGWnd(QDomNode node)
 
 }
 
+
+Menu_Wnd *InterFace::GetMainFrameWnd(QString frame, QDomNode node)
+{
+    Menu_Wnd * wnd = new Menu_Wnd();
+    curFrameWnd = wnd;
+    wnd->node = node;
+    wnd->parent = curFrameWnd;
+    wnd->lbroher = wnd;
+    wnd->rbroher = wnd;
+    wnd->frame = frame;
+    wnd->firstChild = curFrameWnd;
+    wnd->isMainFrame = true;
+    wnd->item = NULL;
+    wnd->label = NULL;
+    wnd->isShow = false;
+    appendMenuWndList(wnd);
+    return wnd;
+
+}
+
+Menu_Wnd *InterFace::GetNormalWnd(QString frame, QDomNode node, Menu_Wnd *lastWnd)
+{
+    Menu_Wnd * wnd = new Menu_Wnd();
+    QString parentName = node.toElement().attribute("ParentName");
+    wnd->node = node;
+    wnd->parent = getParentWnd(parentName, lastWnd);
+    wnd->isMainFrame = false;
+    wnd->frame = frame;
+    wnd->lbroher = getlbrother(wnd, lastWnd);
+    wnd->lbroher->rbroher = wnd;
+    if((wnd->parent == wnd)&&(lastWnd != NULL))
+    {
+        lastWnd->firstChild = wnd;
+    }
+    if((wnd->parent == lastWnd->parent)&&(lastWnd != NULL))
+    {
+        lastWnd->rbroher = wnd;
+    }
+    wnd->rbroher = wnd;
+    wnd->firstChild = wnd;
+    wnd->item = NULL;
+    wnd->label = NULL;
+    wnd->isShow = false;
+    appendMenuWndList(wnd);
+    return wnd;
+}
+
 void InterFace::GetWndList(QString frame, QDomNode node)
 {
     QDomNodeList list = node.toElement().childNodes();
-    Menu_Wnd * wnd, *wnd2;
-    QString parentName;
+    Menu_Wnd *lastWnd = NULL;
 
     for (int i = 0; i< list.count();i++)
     {
@@ -152,45 +198,12 @@ void InterFace::GetWndList(QString frame, QDomNode node)
          {
             if(node2.toElement().tagName() == "Wnd")
             {
-                parentName = node2.toElement().attribute("ParentName");
                 if(node2.toElement().attribute("CtrlTypeName") == "Main Frame")
                 {
-                    wnd = new Menu_Wnd();
-                    wnd->node = node2;
-                    wnd->parent = wnd;
-                    wnd->lbroher = wnd;
-                    wnd->rbroher = wnd;
-                    wnd->frame = frame;
-                    wnd->firstChild = wnd;
-                    wnd->isMainFrame = true;
-                    wnd->item = NULL;
-                    wnd->label = NULL;//new XLabel();
-                    wnd->isShow = false;
-                    appendMenuWndList(wnd);
+                    lastWnd = GetMainFrameWnd(frame, node2);
                 }else
                 {
-                    wnd2 = new Menu_Wnd();
-                    wnd2->node = node2;
-                    wnd2->parent = getParentWnd(parentName, wnd);
-                    wnd2->isMainFrame = false;
-                    wnd2->frame = frame;
-                    wnd2->lbroher = getlbrother(wnd2, wnd);
-                    wnd2->lbroher->rbroher = wnd2;
-                    if(wnd2->parent == wnd)
-                    {
-                        wnd->firstChild = wnd2;
-                    }
-                    if(wnd2->parent == wnd->parent)
-                    {
-                        wnd->rbroher = wnd2;
-                    }
-                    wnd2->rbroher = wnd2;
-                    wnd2->firstChild = wnd2;
-                    wnd2->item = NULL;
-                    wnd2->label = NULL;//new XLabel();
-                    wnd2->isShow = false;
-                    appendMenuWndList(wnd2);
-                    wnd = wnd2;
+                    lastWnd = GetNormalWnd(frame, node2, lastWnd);
                 }
             }
          }
@@ -977,11 +990,12 @@ Menu_Wnd * InterFace::add_xmlnode(Menu_Wnd *wnd, Menu_Wnd *copywnd, CopyNode *pc
 
 Menu_Wnd *InterFace::getParentWnd(QString parenName, Menu_Wnd *prevWnd)
 {
-    if(parenName == "")
+    if((parenName == "")||(prevWnd == NULL))
     {
-        return NULL;
+        return curFrameWnd;
     }
-    else if(parenName == prevWnd->node.toElement().attribute("Name"))
+
+    if(parenName == prevWnd->node.toElement().attribute("Name"))
     {
         return prevWnd;
     }
@@ -1170,21 +1184,27 @@ IMG *InterFace::add_xmlImg(IMG *lastImg, IMG *tagImg)
     newNode.setAttributeNode(attr_ID);
     newNode.setAttributeNode(attr_MENU_IMG_INFO_FOCUS);
 //----------------------
-    QDomElement element_FileName = xmlContents.xmlCreateNode("FileName");
+   QDomElement element_FileName = xmlContents.xmlCreateNode("FileName");
 
-    element_FileName.setNodeValue(tagImg->FileName);
+    element_FileName.appendChild(xmlContents.xmlCreateTextNode(tagImg->FileName));
+   // DEBUG("=====================================");
+   // DEBUG(tagImg->FileName);
 
     QDomElement element_FolderName = xmlContents.xmlCreateNode("FolderName");
     QString folder;
     if(tagImg->FolderName == pSetting->getImgPath())
     {
-        folder = "..\\..\\bitmap1366x768x565";
+        folder = "";
     }else
     {
         folder = tagImg->FolderName.replace(pSetting->getImgPath(), "");
         folder = folder.replace("/", "\\");
     }
-     element_FolderName.setNodeValue(folder);
+     element_FolderName.appendChild(xmlContents.xmlCreateTextNode(folder));
+     // DEBUG(folder);
+     // DEBUG("=====================================");
+
+
 
      newNode.appendChild(element_FileName);
      newNode.appendChild(element_FolderName);
@@ -1234,6 +1254,10 @@ bool InterFace::addImge(QString imgPath)
         {
             imgName = strlist[i];
         }
+        else if(i == strlist.length()-2)
+        {
+            rootPath += strlist[i];
+        }
         else
         {
             rootPath += strlist[i]+"/";
@@ -1245,6 +1269,7 @@ bool InterFace::addImge(QString imgPath)
        namelist = imgName.split(".");
        img = new IMG;
        img->FileName = imgName;
+       rootPath.replace(pSetting->getImgPath(), "");
        img->FolderName = rootPath;
        img->ID = namelist[0];
        ImgList.append(add_xmlImg(ImgList.last(), img));

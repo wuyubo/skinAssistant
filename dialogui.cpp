@@ -7,7 +7,7 @@ DialogUI::DialogUI(InterFace *_pinterface, QWidget *parent) :
 {
     ui->setupUi(this);
     pinterface = _pinterface;
-    ui->rbn_focus->setChecked(true);
+    ui->rbn_normal->setChecked(true);
 }
 
 DialogUI::~DialogUI()
@@ -261,6 +261,7 @@ void DialogUI::showWndToUi(Menu_Wnd *wnd)
 
 void DialogUI::hideWndFromUi(Menu_Wnd *wnd)
 {
+     wnd->isShow = false;
      if(wnd->label != NULL)
      {
          wnd->label->hide();
@@ -371,6 +372,16 @@ void DialogUI::showIcon(XImg *img, QLabel *lb_icon)
 }
 
 
+bool DialogUI::checkIsWndShow(Menu_Wnd *wnd)
+{
+    if(wnd->item->checkState(0) == Qt::Checked)
+    {
+        wnd->isShow = true;
+        return true;
+    }
+    return false;
+}
+
 void DialogUI::refreshUI()
 {
     map_width = (float)UI_WIDTH/(float)pinterface->getWidth();
@@ -380,6 +391,9 @@ void DialogUI::refreshUI()
         if(wnd->frame != pinterface->getCurframe())
         {
             wnd->isShow = false;
+        }else
+        {
+            checkIsWndShow(wnd);
         }
 
         if(wnd->parent->isShow && wnd->isShow)
@@ -389,7 +403,6 @@ void DialogUI::refreshUI()
         {
             hideWndFromUi(wnd);
         }
-
     }
 
 }

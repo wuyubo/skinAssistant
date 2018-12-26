@@ -86,6 +86,8 @@ public:
     void parseXml();
     //////////
     void GetGWnd(QDomNode node);
+    Menu_Wnd *GetMainFrameWnd(QString frame, QDomNode node);
+    Menu_Wnd *GetNormalWnd(QString frame, QDomNode node, Menu_Wnd *lastWnd);
     void GetWndList(QString frame, QDomNode node);
     void getImageList(QDomElement enode);
     XImg *getIamge(QDomNode node);
@@ -150,6 +152,8 @@ public:
     QString curframe;
     int ui_width;
     int ui_height;
+
+    Menu_Wnd *curFrameWnd;
 };
 
 #endif // INTERFACE_H

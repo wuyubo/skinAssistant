@@ -26,6 +26,8 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_ptn_addMirrorImg_clicked();
+
 private:
     Ui::DialogImageClone *ui;
 

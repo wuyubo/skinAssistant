@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = zXml
 TEMPLATE = app
-
+QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\
         xmlexample.cpp \
@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     dialogui.cpp \
     interface.cpp \
     dialogimageclone.cpp \
-    dialogclean.cpp
+    dialogclean.cpp \
+    dialogimage.cpp
 
 HEADERS  += xmlexample.h \
     zxml.h \
@@ -31,12 +32,14 @@ HEADERS  += xmlexample.h \
     dialogui.h \
     interface.h \
     dialogimageclone.h \
-    dialogclean.h
+    dialogclean.h \
+    dialogimage.h
 
 FORMS    += xmlexample.ui \
     dialogui.ui \
     dialogimageclone.ui \
-    dialogclean.ui
+    dialogclean.ui \
+    dialogimage.ui
 
 DISTFILES += \
     skin.png

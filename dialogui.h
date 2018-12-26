@@ -59,6 +59,7 @@ public:
     void setWPostion(Menu_Wnd *wnd, int _x, int _y, int _w, int _h);
     void setWText(Menu_Wnd *wnd, QString text, QPalette *pcolor = NULL, ALIGN_MODE align = ALIGN_CENTER, FONT_SIZE size = FONT_NORMAL);
     void setWBackground(Menu_Wnd *wnd, BG_TYPE type, QString color = NULL, QString image = NULL, Menu_Wnd *cloneWnd = NULL);
+    bool checkIsWndShow(Menu_Wnd *wnd);
 public slots:
     void refreshUI();
 

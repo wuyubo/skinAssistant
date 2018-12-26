@@ -1,6 +1,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
-#define VERSION   "skinAssistant V2.3(图片反转)"
+#define VERSION   "skinAssistant V3.2(视图版)"
 #define WORK_FILE  "./ZUI_WORK.xml"
 #define BACK_UP_FILE "./ZUI_bak.xml"
 

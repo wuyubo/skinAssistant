@@ -1,11 +1,24 @@
 #include "setting.h"
 #include "global.h"
 #include <QFile>
+#include <QDebug>
 Setting::Setting(QObject *parent) : QObject(parent)
 {
+
+    checkSettingFile();
     defaultSetting();
 }
 
+void Setting::checkSettingFile()
+{
+    QFile file(SETTING_FILE);
+    if (file.exists())
+    {
+       return ;
+    }
+    file.open( QIODevice::WriteOnly );
+    file.close();
+}
 
 QString Setting::readFile(QString path)
 {
@@ -86,11 +99,13 @@ bool Setting::saveSetting()
     data.append("rootpath=").append(getRootPath()).append("\r\n");
     data.append("imgPath=").append(getImgPath()).append("\r\n");
     data.append("stringPath=").append(getStringPath()).append("\r\n");
-    saveFile(SETTING_FILE, data, true);
+    return saveFile(SETTING_FILE, data, true);
 }
 
 void Setting::setRootPath(QString path)
 {
+    QStringList strlist = _rootPath.split("skintool");
+    _UiPath = strlist[0];
     _rootPath = path;
 }
 
@@ -99,9 +114,18 @@ QString Setting::getRootPath()
     return _rootPath;
 }
 
+QString Setting::getUiPath()
+{
+    return _UiPath;
+}
+
 void Setting::setImgPath(QString path)
 {
-    _imgPath = path;
+    path =path;
+    QString _path = getImgRelativePath();
+    _path.replace("../../", "");
+    _imgPath = _UiPath+_path;
+    DEBUG(_imgPath);
 }
 
 QString Setting::getImgPath()

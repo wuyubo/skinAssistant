@@ -10,12 +10,14 @@ public:
     explicit Setting(QObject *parent = 0);
     QString readFile(QString path);
     bool saveFile(QString path, QString data, bool isCover = true);
+    void checkSettingFile();
     void defaultSetting();
     bool loadSetting();
     bool saveSetting();
 
     void setRootPath(QString path);
     QString getRootPath();
+    QString getUiPath();
     void setImgPath(QString path);
     QString getImgPath();
     void setStringPath(QString path);
@@ -31,6 +33,7 @@ private:
     QString _imgPath;
     QString _imgRelativePath;
     QString _stringPath;
+    QString _UiPath;
 
 };
 

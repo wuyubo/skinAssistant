@@ -30,6 +30,10 @@ void DialogImageClone::on_pushButton_clicked()
 }
 bool DialogImageClone::copyImage(QString sourceImg ,QString toImg)
 {
+    if(!ui->rbn_rev->isChecked())
+    {
+        return pinterface->copyFileToPath(sourceImg, toImg, true);
+    }
     QImage image(sourceImg);
     if(ui->rbn_rev->isChecked())
     {
@@ -67,15 +71,16 @@ bool DialogImageClone::CloneImage(XImg *img)
     filepath = pinterface->pSetting->getImgPath()+folder+"/"+img->FileName;
     targetFolder = targetPathRoot+folder;
     targetPath = targetPathRoot+folder+"/"+targetName;
-    //qDebug() << filepath;
-    //qDebug() << targetPath;
 
 
     //dir.cd(targetPathRoot);  //进入某文件夹
     if(!dir.exists(targetFolder))//判断需要创建的文件夹是否存在
     {
-        //qDebug() << targetFolder;
-        dir.mkdir(targetFolder); //创建文件夹
+        if(dir.mkdir(targetFolder) == false) //创建文件夹
+        {
+            DEBUG(targetFolder);
+            return false;
+        }
     }
     if(copyImage(filepath, targetPath))
     {
@@ -99,5 +104,15 @@ void DialogImageClone::on_pushButton_2_clicked()
     if(pinterface->pSetting->saveFile(pinterface->pSetting->getRootPath()+"array.c", data, true))
     {
         ui->lb_tip->setText("生成二维数据成功");
+    }
+}
+
+void DialogImageClone::on_ptn_addMirrorImg_clicked()
+{
+    XImg *newimg = new XImg();
+    QString suffix = ui->le_suffix->text();
+    foreach (XImg *img, pinterface->ImgList) {
+        newimg->FileName = img->FileName+suffix;
+        newimg->FolderName = img->FolderName;
     }
 }

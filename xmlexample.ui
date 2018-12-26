@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>995</width>
-    <height>907</height>
+    <width>963</width>
+    <height>932</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -969,8 +969,8 @@ RIGHT</string>
    <widget class="QGroupBox" name="groupBox_img">
     <property name="geometry">
      <rect>
-      <x>1310</x>
-      <y>200</y>
+      <x>980</x>
+      <y>0</y>
       <width>451</width>
       <height>791</height>
      </rect>
@@ -1092,7 +1092,7 @@ RIGHT</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>995</width>
+     <width>963</width>
      <height>26</height>
     </rect>
    </property>
@@ -1112,18 +1112,16 @@ RIGHT</string>
     <bool>false</bool>
    </attribute>
    <addaction name="action"/>
+   <addaction name="separator"/>
    <addaction name="action_save"/>
+   <addaction name="separator"/>
    <addaction name="action_switch"/>
-   <addaction name="action_imageClone"/>
+   <addaction name="separator"/>
    <addaction name="action_clean"/>
-   <addaction name="action_align_left"/>
-   <addaction name="action_alignCenter1"/>
-   <addaction name="action_alignright"/>
-   <addaction name="action_alignUp"/>
-   <addaction name="action_alignCenter2"/>
-   <addaction name="action_alighDown"/>
-   <addaction name="action_postion"/>
-   <addaction name="action_size"/>
+   <addaction name="separator"/>
+   <addaction name="imgManager"/>
+   <addaction name="separator"/>
+   <addaction name="action_refer"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
@@ -1134,8 +1132,16 @@ RIGHT</string>
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>false</bool>
+    <bool>true</bool>
    </attribute>
+   <addaction name="action_align_left"/>
+   <addaction name="action_alignCenter1"/>
+   <addaction name="action_alignright"/>
+   <addaction name="action_alignUp"/>
+   <addaction name="action_alignCenter2"/>
+   <addaction name="action_alighDown"/>
+   <addaction name="action_postion"/>
+   <addaction name="action_size"/>
   </widget>
   <action name="actionAbout">
    <property name="text">
@@ -1160,7 +1166,10 @@ RIGHT</string>
   </action>
   <action name="action_switch">
    <property name="text">
-    <string>切换视图</string>
+    <string>打开视图</string>
+   </property>
+   <property name="toolTip">
+    <string>打开视图</string>
    </property>
   </action>
   <action name="action_align_left">
@@ -1203,17 +1212,22 @@ RIGHT</string>
     <string>设置大小</string>
    </property>
   </action>
-  <action name="action_imageClone">
-   <property name="text">
-    <string>图片克隆</string>
-   </property>
-  </action>
   <action name="action_clean">
    <property name="text">
     <string>XML整理</string>
    </property>
    <property name="toolTip">
     <string>XML整理</string>
+   </property>
+  </action>
+  <action name="imgManager">
+   <property name="text">
+    <string>图片管理</string>
+   </property>
+  </action>
+  <action name="action_refer">
+   <property name="text">
+    <string>参考</string>
    </property>
   </action>
  </widget>

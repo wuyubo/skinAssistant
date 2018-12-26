@@ -4,12 +4,15 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QAbstractItemView>
+#include <thread>
+
 
 xmlExample::xmlExample(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::xmlExample)
 {
   ui->setupUi(this);
+
   xmlReader = NULL;
   oldFrame = "";
   initCopyNode();
@@ -17,9 +20,9 @@ xmlExample::xmlExample(QWidget *parent) :
   set_mode(MODE_SIMPLE);
   //this->showMaximized();
   pinterface = new InterFace(this);
-  pDialogUI  = new DialogUI(pinterface, this);
-  pDialogImageClone = new DialogImageClone(pinterface, this);
+  pDialogUI  = new DialogUI(pinterface, parent);
   pDialogClean = new DialogClean(pinterface, this);
+  pDialgImgManager = new DialogImage(pinterface, this);
   pinterface->setCurframe(ui->cb_Frame->currentText());
   connect(ui->menu_tree,SIGNAL(itemChanged(QTreeWidgetItem *,int)),this,SLOT(treeItemChanged(QTreeWidgetItem*,int)));
   connect(this,SIGNAL(refreshUI_sig()),pDialogUI,SLOT(refreshUI()));
@@ -139,7 +142,7 @@ void xmlExample::treeItemChanged(QTreeWidgetItem *item, int column)
     {
         return;
     }
-    if(item->checkState(0)==Qt::Checked)
+    if(item->checkState(0) == Qt::Checked)
     {
         wnd->isShow = true;
     }else
@@ -202,10 +205,7 @@ void xmlExample::on_ptn_setitem_clicked()
          currentItem->setText(0, ui->le_name->text());
      }
      showtips("修改属性成功");
-     if(opt_mode == MODE_UI)
-     {
-         refreshWndFromUi(wnd);
-     }
+     updateUI();
 }
 
 
@@ -216,10 +216,7 @@ void xmlExample::on_menu_tree_itemClicked(QTreeWidgetItem *item, int column)
     if(wnd)
     {
         showWndAttr(wnd);
-        if(opt_mode == MODE_UI)
-        {
-            refreshWndFromUi(wnd);
-        }
+        updateUI();
     }
 }
 
@@ -420,10 +417,7 @@ void xmlExample::on_ptn_pase_attr_clicked()
            if(wnd->item == item)
            {
                pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-               if(opt_mode == MODE_UI)
-               {
-                   refreshWndFromUi(wnd);
-               }
+               updateUI();
            }
        }
    }
@@ -778,234 +772,8 @@ void xmlExample::on_ptn_conver_clicked()
 void xmlExample::set_mode(OPTION_MODE mode)
 {
     opt_mode = mode;
-    switch (mode) {
-    case MODE_SIMPLE:
-       // ui->groupBox_img->show();
-        ui->lb_mask->show();
-        //ui->groupBox_align->hide();
-        ui->groupBox_img->hide();
-      //  ui->groupBox_attr->setGeometry(100,200,491, 791);
-      // ui->groupBox_tree->setGeometry(610,200,691, 791);
-        ui->ptn_refresh->hide();
-        break;
-    case MODE_UI:
-        ui->groupBox_img->hide();
-        ui->lb_mask->hide();
-        //ui->groupBox_align->show();
-        ui->groupBox_attr->setGeometry(1380,200,491, 791);
-        ui->groupBox_tree->setGeometry(1880,200,591, 791);
-        ui->ptn_refresh->show();
-        break;
-    default:
-        break;
-    }
 }
 
-void xmlExample::showCloneStaticWndProperties(Menu_Wnd *show_wnd, Menu_Wnd *wnd)
-{
-     QDomNode n = wnd->node.firstChild();
-     while (!n.isNull ())
-     {
-        if (n.isElement ())
-        {
-            QDomElement e = n.toElement ();
-            if(e.tagName () == "StaticWndProperties")
-            {
-                QString state = e.toElement().attribute("BgState");
-
-                if(state == "0")
-                {
-
-                }else if(state == "1")
-                {
-                    wnd->label->setPixmap(QPixmap(""));
-                    if(e.toElement().attribute("HasNormalDrawStyle") == "1")
-                    {
-                        QString color = e.toElement().attribute("NormalBgColor");
-                        color = "background-color:"+color;
-                        show_wnd->label->setStyleSheet(color);
-                    }else
-                    {
-                        show_wnd->label->setStyleSheet("");
-                    }
-
-                }
-                else if(state == "2")
-                {
-                    showIconFromId(e.toElement().attribute("NormalBitmapID"), show_wnd->label);
-
-                }
-            }
-        }
-        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
-     }
-}
-
-void xmlExample::showWndToUi(Menu_Wnd *wnd)
-{
-    if(opt_mode != MODE_UI)
-    {
-        return;
-    }
-    QDomNode n = wnd->node.firstChild();
-    bool ok;
-    qDebug() << "-----------------------------";
-    while (!n.isNull ())
-    {
-       if (n.isElement ())
-       {
-           QDomElement e = n.toElement ();
-
-           if(e.tagName () == "Position")
-           {
-                wnd->label->setGeometry(e.toElement().attribute("X").toInt(&ok),
-                                        e.toElement().attribute("Y").toInt(&ok),
-                                        e.toElement().attribute("Width").toInt(&ok),
-                                        e.toElement().attribute("Height").toInt(&ok));
-           }
-           if(e.tagName() == "Text")
-           {
-                if(e.toElement().attribute("TextID")!= "")
-                {
-                    QString color = e.toElement().attribute("NormalTextColor");
-                    color.replace("#", "");
-                    QPalette pa;
-                    pa.setColor(QPalette::WindowText,QColor(QRgb(color.toInt(&ok,16))));
-                    wnd->label->setPalette(pa);
-
-                    QString align = e.toElement().attribute("TextAlign");
-                    if(align == "0")
-                    {
-                        wnd->label->setAlignment(Qt::AlignLeft);
-                    }
-                    else if(align == "3")
-                    {
-                        wnd->label->setAlignment(Qt::AlignCenter);
-                    }
-                    else if(align == "2")
-                    {
-                        wnd->label->setAlignment(Qt::AlignRight);
-                    }
-                    wnd->label->setStyleSheet("font: 75 12pt '微软雅黑';");
-                    qDebug() << "-----------------------------"<< pinterface->getString(e.toElement().attribute("TextID"), "English");
-                    wnd->label->setText(pinterface->getString(e.toElement().attribute("TextID"), "English"));
-                    //qDebug() << getString(e.toElement().attribute("TextID"), "English");
-                }
-
-           }
-           if(e.tagName () == "StaticWndProperties")
-           {
-                QString state = e.toElement().attribute("BgState");
-
-                if(state == "0")
-                {
-                    QString clone = e.toElement().attribute("Clone");
-                    Menu_Wnd *w = pinterface->getWndFromId(clone);
-                    if(w != NULL)
-                    {
-                        showCloneStaticWndProperties(wnd, w);
-                    }
-
-                }else if(state == "1")
-                {
-                    wnd->label->setPixmap(QPixmap(""));
-                    if(e.toElement().attribute("HasNormalDrawStyle") == "1")
-                    {
-                        QString color = e.toElement().attribute("NormalBgColor");
-                        color = "background-color:"+color;
-                        wnd->label->setStyleSheet(color);
-                    }else
-                    {
-                        wnd->label->setStyleSheet("");
-                    }
-
-                }
-                else if(state == "2")
-                {
-                    showIconFromId(e.toElement().attribute("NormalBitmapID"), wnd->label);
-
-                }
-
-
-           }
-       }
-       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
-
-    }
-    wnd->label->show();
-    wnd->isShow = true;
-}
-
-void xmlExample::hideWndFromUi(Menu_Wnd *wnd)
-{
-    if(opt_mode != MODE_UI)
-    {
-        return;
-    }
-     wnd->label->hide();
-     wnd->isShow = false;
-}
-
-void xmlExample::refreshWndFromUi(Menu_Wnd *wnd)
-{
-    if(opt_mode != MODE_UI)
-    {
-        return;
-    }
-    //qDebug() << wnd->node.toElement().attribute("Name")<< wnd->item->checkState(0);
-    if(Qt::Checked == wnd->item->checkState(0))
-    {
-        showWndToUi(wnd);
-    }
-    else
-    {
-        hideWndFromUi(wnd);
-    }
-}
-
-
-void xmlExample::showTreetoUI(Menu_Wnd *w)
-{
-    if(opt_mode != MODE_UI)
-    {
-        return;
-    }
-    refreshWndFromUi(w);
-
-    while(w != w->rbroher)
-    {
-        w = w->rbroher;
-        refreshWndFromUi(w);
-        if((w->firstChild != w))
-        {
-            if((w->isShow))
-            {
-                showTreetoUI(w->firstChild);
-            }else
-            {
-                hideTreeFromUI(w->firstChild);
-            }
-        }
-
-    }
-}
-void xmlExample::hideTreeFromUI(Menu_Wnd *w)
-{
-    if(opt_mode != MODE_UI)
-    {
-        return;
-    }
-    hideWndFromUi(w);
-    while(w != w->rbroher)
-    {
-        w = w->rbroher;
-        hideWndFromUi(w);
-        if(w->firstChild != w)
-        {
-            hideTreeFromUI(w->firstChild);
-        }
-    }
-}
 
 void xmlExample::on_ptn_refresh_clicked()
 {
@@ -1013,23 +781,6 @@ void xmlExample::on_ptn_refresh_clicked()
     {
         return;
     }
-    pinterface->setCurframe(ui->cb_Frame->currentText());
-    foreach(Menu_Wnd * wnd, pinterface->menuWndList)
-    {
-
-        if(wnd->node.toElement().attribute("CtrlTypeName") == "Main Frame")
-        {
-            if(wnd->frame == pinterface->getCurframe())
-            {
-                showTreetoUI(wnd);
-            }else
-            {
-               hideTreeFromUI(wnd);
-
-            }
-        }
-    }
-
 }
 
 
@@ -1052,7 +803,7 @@ void xmlExample::on_ptn_alignleft_clicked()
             {
 
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1078,7 +829,7 @@ void xmlExample::on_ptn_aligncenter_clicked()
             {
 
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1104,7 +855,7 @@ void xmlExample::on_ptn_alignright_clicked()
             {
 
                 pinterface->cloneWndAttr(wnd, m_CopyNode, m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1130,7 +881,7 @@ void xmlExample::on_ptn_alignup_clicked()
             {
 
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1156,7 +907,7 @@ void xmlExample::on_ptn_aligncenter_UD_clicked()
             {
 
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1182,7 +933,7 @@ void xmlExample::on_ptn_aligndown_clicked()
             {
 
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1208,7 +959,7 @@ void xmlExample::on_ptn_moveleft_pos_clicked()
                 copyWndAttr(wnd);
                 m_CopyNode.position.X -= step;
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1243,7 +994,7 @@ void xmlExample::on_ptn_moveright_pos_clicked()
                 copyWndAttr(wnd);
                 m_CopyNode.position.X += step;
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1269,7 +1020,7 @@ void xmlExample::on_ptn_moveup_pos_clicked()
                 copyWndAttr(wnd);
                 m_CopyNode.position.Y -= step;
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1295,7 +1046,7 @@ void xmlExample::on_ptn_movedown_pos_clicked()
                 copyWndAttr(wnd);
                 m_CopyNode.position.Y += step;
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                updateUI();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1475,13 +1226,20 @@ void xmlExample::on_action_save_triggered()
     }
 }
 
+void xmlExample::updateUI()
+{
+    if(opt_mode == MODE_UI)
+    {
+        emit refreshUI_sig();
+    }
+}
+
 void xmlExample::on_action_switch_triggered()
 {
-
     pDialogUI->show();
-    emit refreshUI_sig();
-   // pDialogUI->refreshUI();
-
+    set_mode(MODE_UI);
+    updateUI();
+    //this->activateWindow();
 }
 
 void xmlExample::on_action_align_left_triggered()
@@ -1531,7 +1289,7 @@ void xmlExample::on_action_postion_triggered()
             {
 
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                emit refreshUI_sig();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
@@ -1557,17 +1315,14 @@ void xmlExample::on_action_size_triggered()
             {
 
                 pinterface->cloneWndAttr(wnd, m_CopyNode,  m_CopyNode);
-                refreshWndFromUi(wnd);
+                emit refreshUI_sig();
                 ui->menu_tree->setItemSelected(item,true);
                 showWndAttr(wnd);
             }
         }
     }
 }
-void xmlExample::on_action_imageClone_triggered()
-{
-    pDialogImageClone->show();
-}
+
 //================= main bar action  end========================================
 
 
@@ -1627,5 +1382,12 @@ void xmlExample::on_ptn_show_hide_clicked()
     {
         ItemShowHide(item, true);
     }
+    emit refreshUI_sig();
 
+}
+
+void xmlExample::on_imgManager_triggered()
+{
+    pDialgImgManager->show();
+    pDialgImgManager->showImgeList();
 }

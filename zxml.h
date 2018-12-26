@@ -116,6 +116,7 @@ public:
   XSkinToolProject * getSkinToolProject();
   bool changeSave(QIODevice *device);
   QDomElement xmlCreateNode(QString tagName);
+  QDomText xmlCreateTextNode(QString textName);
   QDomAttr xmlCreateAttribute(QString name);
 public:
   void readXmlContents();
