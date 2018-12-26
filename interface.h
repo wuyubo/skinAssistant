@@ -77,6 +77,7 @@ class InterFace : public QObject
     Q_OBJECT
 public:
     explicit InterFace(QObject *parent = 0);
+    void init();
     Setting *getSetting();
 
     ////////////////

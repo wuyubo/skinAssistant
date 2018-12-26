@@ -1203,6 +1203,7 @@ void xmlExample::on_action_triggered()
     path = QFileDialog::getOpenFileName(this,QString::fromLocal8Bit("Choose xml"), path, tr("*.xml"));
     if(pinterface->load_xml(path))
     {
+        ui->cb_Frame->clear();
         foreach (QString frame, pinterface->frameList) {
             ui->cb_Frame->addItem(frame);
         }

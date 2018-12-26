@@ -3,8 +3,20 @@
 
 InterFace::InterFace(QObject *parent) : QObject(parent)
 {
+    init();
     pSetting = new Setting(this);
     pSetting->loadSetting();
+}
+
+void InterFace::init()
+{
+    m_docElem.clear();
+
+    menuWndList.clear();
+    ImgList.clear();
+    StringList.clear();
+    frameList.clear();
+    curframe.clear();
 }
 
 Setting *InterFace::getSetting()
@@ -30,14 +42,13 @@ bool InterFace::load_xml(QString xmlfile)
     _xml_file = xmlfile;
     if(_xml_file != NULL)
     {
+        init();
         copyFileToPath(_xml_file, BACK_UP_FILE, true);
         copyFileToPath(_xml_file, WORK_FILE, true);
         if(read_xml())
         {
             pSetting->setRootPath(getRootPathFromxmlFile(_xml_file));
             parseXml();
-            //initTreeWidget();
-            //showImge();
             pSetting->saveSetting();
             return true;
         }
