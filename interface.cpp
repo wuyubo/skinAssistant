@@ -45,11 +45,14 @@ bool InterFace::load_xml(QString xmlfile)
         init();
         copyFileToPath(_xml_file, BACK_UP_FILE, true);
         copyFileToPath(_xml_file, WORK_FILE, true);
+
         if(read_xml())
         {
+
             pSetting->setRootPath(getRootPathFromxmlFile(_xml_file));
             parseXml();
             pSetting->saveSetting();
+
             return true;
         }
         return false;
@@ -78,6 +81,7 @@ void InterFace::parseXml()
     QString temp;
     QString header;
     bool ok;
+    DEBUG("======parseXml START========");
     while (!n.isNull ())
     {
        if (n.isElement ()) {
@@ -87,6 +91,7 @@ void InterFace::parseXml()
            if(e.tagName () == "GWndList")
            {
                QDomNodeList list = e.childNodes ();
+               GWndList = list;
                for (int i = 0; i< list.count ();i++)
                {
                    QDomNode node = list.at(i);
@@ -102,6 +107,7 @@ void InterFace::parseXml()
            }
            else if(e.tagName () == "SizePanel")
            {
+                SizePanel = n;
                 setWidth(e.attribute("Width").toInt(&ok));
                 setHeight(e.attribute("Height").toInt(&ok));
 
@@ -129,7 +135,9 @@ void InterFace::parseXml()
        }
        n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
    }
+    DEBUG("======parseXml END========");
 }
+
 /////////////////////
 void InterFace::GetGWnd(QDomNode node)
 {
@@ -218,7 +226,7 @@ void InterFace::GetWndList(QString frame, QDomNode node)
                 }
             }
          }
- }
+  }
 }
 
 void InterFace::getImageList(QDomElement enode)
@@ -1001,12 +1009,13 @@ Menu_Wnd * InterFace::add_xmlnode(Menu_Wnd *wnd, Menu_Wnd *copywnd, CopyNode *pc
 
 Menu_Wnd *InterFace::getParentWnd(QString parenName, Menu_Wnd *prevWnd)
 {
+    QString prevName = "";
     if((parenName == "")||(prevWnd == NULL))
     {
         return curFrameWnd;
     }
-
-    if(parenName == prevWnd->node.toElement().attribute("Name"))
+    prevName = prevWnd->node.toElement().attribute("Name");
+    if("MAINFRAME" == prevName || parenName == prevName)
     {
         return prevWnd;
     }
@@ -1014,6 +1023,7 @@ Menu_Wnd *InterFace::getParentWnd(QString parenName, Menu_Wnd *prevWnd)
     {
         return getParentWnd(parenName, prevWnd->parent);
     }
+    return curFrameWnd;
 }
 Menu_Wnd * InterFace::getlbrother(Menu_Wnd *curwnd, Menu_Wnd *prewnd)
 {
@@ -1502,7 +1512,60 @@ void InterFace::setWinIamgeId(Menu_Wnd *wnd, QString imgID, ITEM_STATUS status)
     }
 }
 
+QString InterFace::getWinTextId(Menu_Wnd *wnd, ITEM_STATUS status)
+{
+    QDomNode n = wnd->node.firstChild();
+    while (!n.isNull ())
+    {
+       if (n.isElement ())
+       {
+           QDomElement e = n.toElement ();
+           if(e.tagName () == "Text")
+           {
+               if(status == ST_NOMAL)
+               {
+                   return e.toElement().attribute("FontTypeIndex");
+               }else if(status == ST_FOCUS)
+               {
+                   return e.toElement().attribute("FocusFontTypeIndex");
+               }else if(status == ST_DISABLE)
+               {
+                   return e.toElement().attribute("DisableFontTypeIndex");
+               }
+           }
+       }
+       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
 
+    }
+    return "";
+}
+
+void InterFace::setWinTextId(Menu_Wnd *wnd, QString txtID, ITEM_STATUS status)
+{
+    QDomNode n = wnd->node.firstChild();
+    while (!n.isNull ())
+    {
+       if (n.isElement ())
+       {
+           QDomElement e = n.toElement ();
+           if(e.tagName () == "Text")
+           {
+               if(status == ST_NOMAL)
+               {
+                   e.toElement().setAttribute("FontTypeIndex", txtID);
+               }else if(status == ST_FOCUS)
+               {
+                   e.toElement().setAttribute("FocusFontTypeIndex", txtID);
+               }else if(status == ST_DISABLE)
+               {
+                   e.toElement().setAttribute("DisableFontTypeIndex", txtID);
+               }
+           }
+       }
+       n = n.nextSibling ();//nextSibling()获取下一个兄弟节点
+
+    }
+}
 
 QString InterFace::checkImgFromID(QString imgID, int type)
 {
@@ -1572,4 +1635,22 @@ bool InterFace::removeStr(XString *str)
     StringList.removeOne(str);
 
     return true;
+}
+
+QString InterFace::getWinName(Menu_Wnd *wnd)
+{
+    if(wnd)
+    {
+      wnd->node.toElement().attribute("Name");
+    }
+    return NULL;
+}
+
+QString InterFace::getWinParentName(Menu_Wnd *wnd)
+{
+    if(wnd)
+    {
+      wnd->node.toElement().attribute("ParentName");
+    }
+    return NULL;
 }

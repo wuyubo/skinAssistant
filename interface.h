@@ -133,7 +133,11 @@ public:
     QString getWinStrId(Menu_Wnd *wnd);
     void setWinStrId(Menu_Wnd *wnd, QString imgID);
     bool removeStr(XString *str);
+    QString getWinName(Menu_Wnd *wnd);
+    QString getWinParentName(Menu_Wnd *wnd);
     ////////////////
+    QString getWinTextId(Menu_Wnd *wnd, ITEM_STATUS status);
+    void setWinTextId(Menu_Wnd *wnd, QString txtID, ITEM_STATUS status);
 
 signals:
 
@@ -145,6 +149,8 @@ public:
     ZXml xmlContents;
 
     QDomElement m_docElem;
+    QDomNode SizePanel;
+    QDomNodeList GWndList;
 
     QList<Menu_Wnd *> menuWndList;
     QList<XImg *>  ImgList;

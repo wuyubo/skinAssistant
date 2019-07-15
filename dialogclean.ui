@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>393</width>
-    <height>306</height>
+    <width>429</width>
+    <height>327</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="ptn_image">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>260</y>
+     <x>10</x>
+     <y>270</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -30,7 +30,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>260</y>
+     <y>240</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -42,7 +42,7 @@
   <widget class="QPushButton" name="ptn_relink">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>140</x>
      <y>260</y>
      <width>111</width>
      <height>28</height>
@@ -66,6 +66,39 @@
    </property>
    <property name="text">
     <string>提示</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ptn_changeFont">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>260</y>
+     <width>111</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>字体大小切换</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="le_font1">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>230</y>
+     <width>41</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="le_font2">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>230</y>
+     <width>41</width>
+     <height>21</height>
+    </rect>
    </property>
   </widget>
  </widget>

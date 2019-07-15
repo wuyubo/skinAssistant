@@ -48,6 +48,8 @@ void xmlExample::showWndlist()
     QTreeWidgetItem *group1;
     ui->menu_tree->clear();
     pinterface->setCurframe(ui->cb_Frame->currentText());
+    ui->le_panel_height->setText(QString::number(pinterface->getHeight()));
+    ui->le_panel_width->setText(QString::number(pinterface->getWidth()));
 
     if(oldFrame != "")
     {
@@ -117,7 +119,7 @@ void xmlExample::showImge()
         }
         standardItemModel->appendRow(item);
     }
-    ui->lv_img_list->setModel(standardItemModel);
+   // ui->lv_img_list->setModel(standardItemModel);
 }
 
 //initTreeWidget() 的实现
@@ -1391,4 +1393,155 @@ void xmlExample::on_imgManager_triggered()
 {
     pDialgImgManager->show();
     pDialgImgManager->showImgeList();
+}
+
+int xmlExample::getUIx(int _x, float map_width)
+{
+    return (int)_x*map_width;
+}
+int xmlExample::getUIy(int _y, float map_height )
+{
+    return (int)_y*map_height;
+}
+
+int xmlExample::getUIh(int _h, float map_height)
+{
+    if(_h < 25)
+    {
+        return _h;
+    }
+    return (int)_h*map_height;
+}
+int xmlExample::getUIw(int _w, float map_width)
+{
+    if(_w < 25)
+    {
+        return _w;
+    }
+     return (int)_w*map_width;
+}
+
+void xmlExample::ChangeUiSize(int w, int h)
+{
+    bool ok = false;
+    QDomElement e;
+
+    e = pinterface->SizePanel.toElement ();
+    e.setAttribute("Width", w);
+    e.setAttribute("Height", h);
+
+    if(w == 1366)
+    {
+        w = 1360;
+    }
+    float map_width = (float)w/(float)pinterface->getWidth();
+    float map_height = (float)h/(float)pinterface->getHeight();
+
+    QDomNodeList list = pinterface->GWndList;
+    for (int i = 0; i< list.count ();i++)
+    {
+        QDomNode node = list.at(i);
+
+        if (node.isElement ())
+        {
+            if(node.toElement().tagName() == "GWnd")
+            {
+                e = node.toElement ();
+                e.setAttribute("Width", getUIw(e.attribute("Width").toInt(&ok), map_width));
+                e.setAttribute("Height", getUIh(e.attribute("Height").toInt(&ok), map_height));
+                e.setAttribute("XPos", getUIx(e.attribute("XPos").toInt(&ok), map_width));
+                e.setAttribute("YPos", getUIy(e.attribute("YPos").toInt(&ok),map_height));
+            }
+        }
+    }
+
+    foreach(Menu_Wnd * wnd, pinterface->menuWndList)
+    {
+        QDomNode n = wnd->node.firstChild();
+        while (!n.isNull ())
+        {
+           if (n.isElement ())
+           {
+               e = n.toElement ();
+
+               if(e.tagName () == "Position")
+               {
+                    e.toElement().setAttribute("X", getUIx(e.toElement().attribute("X").toInt(&ok), map_width));
+                    e.toElement().setAttribute("Y",getUIy(e.toElement().attribute("Y").toInt(&ok),map_height ));
+                    e.toElement().setAttribute("Width",getUIw(e.toElement().attribute("Width").toInt(&ok), map_width));
+                    e.toElement().setAttribute("Height", getUIh(e.toElement().attribute("Height").toInt(&ok), map_height));
+               }
+           }
+           n = n.nextSibling();
+        }
+    }
+    showtips("分辨率转换成功。。。。。！");
+    DEBUG("===========================OK");
+}
+
+void xmlExample::on_ptn_change_menu_size_clicked()
+{
+    bool ok = false;
+    int w = ui->le_panel_width_2->text().toInt(&ok);
+    int h = ui->le_panel_height_2->text().toInt(&ok);
+    if(w == pinterface->getWidth() && h == pinterface->getHeight())
+    {
+        return;
+    }
+    if(ok)
+    {
+        ChangeUiSize(w,h);
+    }
+}
+
+void xmlExample::resizeWnd(Menu_Wnd *wnd, float map_width, float map_height)
+{
+    bool ok;
+    QDomNode n = wnd->node.firstChild();
+    while (!n.isNull ())
+    {
+       if (n.isElement ())
+       {
+           QDomElement e = n.toElement ();
+
+           if(e.tagName () == "Position")
+           {
+                e.toElement().setAttribute("X", getUIx(e.toElement().attribute("X").toInt(&ok), map_width));
+                e.toElement().setAttribute("Y",getUIy(e.toElement().attribute("Y").toInt(&ok),map_height ));
+                e.toElement().setAttribute("Width",getUIw(e.toElement().attribute("Width").toInt(&ok), map_width));
+                e.toElement().setAttribute("Height", getUIh(e.toElement().attribute("Height").toInt(&ok), map_height));
+           }
+       }
+       n = n.nextSibling();
+    }
+}
+
+void xmlExample::on_ptn_resize_clicked()
+{
+    QTreeWidgetItem * currentItem = ui->menu_tree->currentItem();
+    bool ok;
+
+    if(currentItem==Q_NULLPTR)
+    {
+        return;
+    }
+    float map_width = ui->le_resize_w->text().toFloat(&ok);
+    float map_height = ui->le_resize_h->text().toFloat(&ok);
+
+
+    foreach(Menu_Wnd * wnd, pinterface->menuWndList)
+    {
+        if(wnd->frame != pinterface->getCurframe())
+        {
+            continue;
+        }
+
+        if(wnd->item->checkState(0) == Qt::Checked)
+        {
+            resizeWnd(wnd, map_width, map_height);
+        }
+    }
+    DEBUG("=============");
+    showtips("UI缩放成功。。。。。！");
+
 }

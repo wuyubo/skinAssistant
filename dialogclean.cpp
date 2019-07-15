@@ -157,3 +157,51 @@ bool DialogClean::isCheckStrUse(QString strID)
     return false;
 }
 
+
+void DialogClean::on_ptn_changeFont_clicked()
+{
+    QString font1 = ui->le_font1->text();
+    QString font2 = ui->le_font2->text();
+    QString tempID = "";
+    if(font1 != "0" && font1 != "1" && font1 != "2")
+    {
+        ui->lb_tip->setText("请输入正确的字体大小");
+        return;
+    }
+    if(font2 != "0" && font2 != "1" && font2 != "2")
+    {
+        ui->lb_tip->setText("请输入正确的字体大小");
+        return;
+    }
+
+    foreach(Menu_Wnd * wnd, pinterface->menuWndList)
+    {
+
+        tempID = pinterface->getWinTextId(wnd, ST_NOMAL);
+        if(tempID == font1)
+        {
+            pinterface->setWinTextId(wnd, font2, ST_NOMAL);
+        }else if((tempID == font2))
+        {
+            pinterface->setWinTextId(wnd, font1, ST_NOMAL);
+        }
+
+        tempID = pinterface->getWinTextId(wnd, ST_FOCUS);
+        if(tempID == font1)
+        {
+            pinterface->setWinTextId(wnd, font2, ST_FOCUS);
+        }else if((tempID == font2))
+        {
+            pinterface->setWinTextId(wnd, font1, ST_FOCUS);
+        }
+        tempID = pinterface->getWinTextId(wnd, ST_DISABLE);
+        if(tempID == font1)
+        {
+            pinterface->setWinTextId(wnd, font2, ST_DISABLE);
+        }else if((tempID == font2))
+        {
+            pinterface->setWinTextId(wnd, font1, ST_DISABLE);
+        }
+    }
+    ui->lb_tip->setText("转换成功");
+}

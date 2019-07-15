@@ -51,6 +51,12 @@ public:
   void  setWndAttr(Menu_Wnd *wnd);
   void ItemShowHide(QTreeWidgetItem * item, bool isShow);
   void updateUI();
+  int getUIx(int _x, float map_width);
+  int getUIy(int _y, float map_height);
+  int getUIh(int _h, float map_height);
+  int getUIw(int _w, float map_width);
+  void ChangeUiSize(int w, int h);
+  void resizeWnd(Menu_Wnd *curWnd, float map_width, float map_height);
 
 public:
   void on_ptn_alignleft_clicked();
@@ -151,6 +157,10 @@ private slots:
     void on_ptn_show_hide_clicked();
 
     void on_imgManager_triggered();
+
+    void on_ptn_change_menu_size_clicked();
+
+    void on_ptn_resize_clicked();
 
 signals:
     void refreshUI_sig();

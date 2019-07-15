@@ -24,6 +24,8 @@ private slots:
 
     void on_ptn_image_clicked();
 
+    void on_ptn_changeFont_clicked();
+
 private:
     Ui::DialogClean *ui;
     InterFace *pinterface;
