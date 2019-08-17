@@ -33,6 +33,37 @@ xmlExample::~xmlExample()
   delete ui;
 }
 
+void xmlExample::on_le_fuzzySearch_editingFinished()
+{
+//    on_ptn_search_clicked();
+
+    QString txt = ui->le_fuzzySearch->text();
+    if (txt == NULL) return;
+    QList<QTreeWidgetItem*> clist = ui->menu_tree->findItems(txt, Qt::MatchContains|Qt::MatchRecursive, 0);
+//    QList<QTreeWidgetItem*> clist = ui->menu_tree->findItems(txt, Qt::MatchExactly|Qt::MatchRecursive, 0);
+    foreach(QTreeWidgetItem* item, clist)
+    {
+        qDebug() << item->text(0);
+//        item->setBackground(0, Qt::green);
+        if (item->parent() != NULL)
+            parentExpand(item);
+        ui->menu_tree->setCurrentItem(item);
+    }
+}
+
+void xmlExample::parentExpand(QTreeWidgetItem *item)
+{
+    if (item->parent() != NULL)
+    {
+        QTreeWidgetItem *pItem = item->parent();
+        if (!pItem->isExpanded())
+        {
+            pItem->setExpanded(true);
+        }
+        parentExpand(pItem);
+    }
+}
+
 void xmlExample::initCopyNode()
 {
     m_CopyNode.type = CNONE;

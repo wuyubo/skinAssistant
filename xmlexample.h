@@ -58,6 +58,8 @@ public:
   void ChangeUiSize(int w, int h);
   void resizeWnd(Menu_Wnd *curWnd, float map_width, float map_height);
 
+  void parentExpand(QTreeWidgetItem *item);
+
 public:
   void on_ptn_alignleft_clicked();
 
@@ -161,6 +163,8 @@ private slots:
     void on_ptn_change_menu_size_clicked();
 
     void on_ptn_resize_clicked();
+
+    void on_le_fuzzySearch_editingFinished();
 
 signals:
     void refreshUI_sig();

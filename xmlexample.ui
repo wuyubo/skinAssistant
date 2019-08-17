@@ -1259,6 +1259,29 @@ RIGHT</string>
      </property>
     </widget>
    </widget>
+   <widget class="QLineEdit" name="le_fuzzySearch">
+    <property name="geometry">
+     <rect>
+      <x>960</x>
+      <y>740</y>
+      <width>171</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ptn_search">
+    <property name="geometry">
+     <rect>
+      <x>1140</x>
+      <y>740</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Search</string>
+    </property>
+   </widget>
    <zorder>groupBox_ui</zorder>
    <zorder>lb_mask</zorder>
    <zorder>groupBox_attr</zorder>
@@ -1267,6 +1290,8 @@ RIGHT</string>
    <zorder>ptn_refresh</zorder>
    <zorder>lb_tips</zorder>
    <zorder>groupBox_img_2</zorder>
+   <zorder>le_fuzzySearch</zorder>
+   <zorder>ptn_search</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -1274,7 +1299,7 @@ RIGHT</string>
      <x>0</x>
      <y>0</y>
      <width>1316</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
