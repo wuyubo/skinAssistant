@@ -51,6 +51,7 @@ bool InterFace::load_xml(QString xmlfile)
 
             pSetting->setRootPath(getRootPathFromxmlFile(_xml_file));
             parseXml();
+            initCompleter();
             pSetting->saveSetting();
 
             return true;
@@ -58,6 +59,18 @@ bool InterFace::load_xml(QString xmlfile)
         return false;
     }
     return false;
+}
+
+void InterFace::initCompleter()
+{
+    //menuWndList contains all wnd, we don't need to care about frame
+    foreach(Menu_Wnd *wnd, menuWndList)
+    {
+        strWndList << wnd->node.toElement().attribute("Name");
+    }
+    pCompleter = new QCompleter(strWndList);
+    pCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    pCompleter->setFilterMode(Qt::MatchContains);
 }
 
 bool InterFace::saveXml()
@@ -222,8 +235,9 @@ void InterFace::GetWndList(QString frame, QDomNode node)
                     lastWnd = GetMainFrameWnd(frame, node2);
                 }else
                 {
-                    lastWnd = GetNormalWnd(frame, node2, lastWnd);
+                    lastWnd = GetNormalWnd(frame, node2, lastWnd);                    
                 }
+//                qDebug() << lastWnd->item;//lastWnd->item->text(0);
             }
          }
   }

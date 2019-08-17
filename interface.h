@@ -14,6 +14,8 @@
 #include "zxml.h"
 #include <QStandardItem>
 #include <QLabel>
+#include <QCompleter>
+#include <QStringListModel>
 
 typedef enum{
     ST_FOCUS,
@@ -138,7 +140,8 @@ public:
     ////////////////
     QString getWinTextId(Menu_Wnd *wnd, ITEM_STATUS status);
     void setWinTextId(Menu_Wnd *wnd, QString txtID, ITEM_STATUS status);
-
+    ////////////////
+    void initCompleter();
 signals:
 
 public slots:
@@ -161,6 +164,10 @@ public:
     int ui_height;
 
     Menu_Wnd *curFrameWnd;
+
+    QStringList strWndList;
+    QCompleter *pCompleter;
+//    QStringListModel *pStrListModel;
 };
 
 #endif // INTERFACE_H

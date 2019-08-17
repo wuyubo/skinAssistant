@@ -186,6 +186,7 @@ private:
   DialogClean *pDialogClean;
   DialogImage *pDialgImgManager;
 
+  void showAutoCompleter();
 };
 
 #endif // XMLEXAMPLE_H

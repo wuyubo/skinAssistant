@@ -5,7 +5,7 @@
 #include <QMessageBox>
 #include <QAbstractItemView>
 #include <thread>
-
+#include "interface.h"
 
 xmlExample::xmlExample(QWidget *parent) :
   QMainWindow(parent),
@@ -44,7 +44,6 @@ void xmlExample::on_le_fuzzySearch_editingFinished()
     foreach(QTreeWidgetItem* item, clist)
     {
         qDebug() << item->text(0);
-//        item->setBackground(0, Qt::green);
         if (item->parent() != NULL)
             parentExpand(item);
         ui->menu_tree->setCurrentItem(item);
@@ -111,7 +110,7 @@ void xmlExample::showWndlist()
              group1->setText(0,wnd->node.toElement().attribute("Name"));
              group1->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsEnabled|Qt::ItemIsSelectable);
              group1->setCheckState(0,Qt::Unchecked);
-             wnd->item = group1;
+             wnd->item = group1;             
         }
         else
         {
@@ -125,7 +124,11 @@ void xmlExample::showWndlist()
 }
 
 
-
+void xmlExample::showAutoCompleter()
+{
+    ui->le_fuzzySearch->setCompleter(pinterface->pCompleter);
+    ui->le_fuzzySearch->show();
+}
 
 void xmlExample::showImge()
 {
@@ -1242,6 +1245,7 @@ void xmlExample::on_action_triggered()
         }
         showWndlist();
         showtips("打开 "+path+" 成功");
+        showAutoCompleter();
     }
     else
     {
