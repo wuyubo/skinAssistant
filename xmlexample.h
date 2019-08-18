@@ -59,6 +59,8 @@ public:
   void resizeWnd(Menu_Wnd *curWnd, float map_width, float map_height);
 
   void parentExpand(QTreeWidgetItem *item);
+  int getComboBoxIndexByName(QString name);
+  void searchEveryFrame(QString wndName);
 
 public:
   void on_ptn_alignleft_clicked();

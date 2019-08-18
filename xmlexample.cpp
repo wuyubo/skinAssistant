@@ -33,21 +33,42 @@ xmlExample::~xmlExample()
   delete ui;
 }
 
+int xmlExample::getComboBoxIndexByName(QString name)
+{
+    int index;
+    index = ui->cb_Frame->findText(name);
+    if (-1 != index)
+        return index;
+    return 0;
+}
+
 void xmlExample::on_le_fuzzySearch_editingFinished()
 {
 //    on_ptn_search_clicked();
 
     QString txt = ui->le_fuzzySearch->text();
-    if (txt == NULL) return;
+    searchEveryFrame(txt);
     QList<QTreeWidgetItem*> clist = ui->menu_tree->findItems(txt, Qt::MatchContains|Qt::MatchRecursive, 0);
-//    QList<QTreeWidgetItem*> clist = ui->menu_tree->findItems(txt, Qt::MatchExactly|Qt::MatchRecursive, 0);
-    foreach(QTreeWidgetItem* item, clist)
+    if (clist.length() == 0)
+        qDebug() << "no matche!";
+
+    foreach(QTreeWidgetItem* item, clist)// selected the last match
     {
-        qDebug() << item->text(0);
+//        qDebug() << item->text(0);
         if (item->parent() != NULL)
             parentExpand(item);
         ui->menu_tree->setCurrentItem(item);
     }
+}
+
+void xmlExample::searchEveryFrame(QString wndName)
+{
+    if (wndName == NULL) return;
+
+    Menu_Wnd *tempWnd = pinterface->getWndByName(wndName);
+    pinterface->setCurframe(tempWnd->frame);
+    ui->cb_Frame->setCurrentIndex(getComboBoxIndexByName(tempWnd->frame));
+    showWndlist();
 }
 
 void xmlExample::parentExpand(QTreeWidgetItem *item)
@@ -167,6 +188,7 @@ void xmlExample::initTreeWidget()
    // listWidget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection) #设置选择模式
 
    // 选择模式有:ExtendedSelection 按住ctrl多选, SingleSelection 单选 MultiSelection 点击多选 ContiguousSelection 鼠标拖拉多选
+    // 				按住shift连续多选
 }
 
 //treeItemChanged(QTreeWidgetItem *item, int column)的实现

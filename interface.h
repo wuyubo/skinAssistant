@@ -114,9 +114,11 @@ public:
     IMG *add_xmlImg(IMG *lastImg, IMG *tagImg);
     bool checkImg(QString imgName);
     bool addImge(QString imgPath);
-    Menu_Wnd * getParentWnd(QString parenName, Menu_Wnd *prevWnd);
-    Menu_Wnd * getlbrother(Menu_Wnd *curwnd, Menu_Wnd *prewnd);
-    Menu_Wnd* getWndLastChild(Menu_Wnd *wnd);
+    Menu_Wnd *getParentWnd(QString parenName, Menu_Wnd *prevWnd);
+    Menu_Wnd *getlbrother(Menu_Wnd *curwnd, Menu_Wnd *prewnd);
+    Menu_Wnd *getWndLastChild(Menu_Wnd *wnd);
+    Menu_Wnd *getWndByName(QString name);
+
     QDomElement getChildNode(QDomElement node, QString childName);
     void removeChild(Menu_Wnd *wnd);
     Menu_Wnd *getWndFromId(QString ID);
