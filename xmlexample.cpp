@@ -67,8 +67,8 @@ void xmlExample::searchEveryFrame(QString wndName)
 
     Menu_Wnd *tempWnd = pinterface->getWndByName(wndName);
     pinterface->setCurframe(tempWnd->frame);
-    ui->cb_Frame->setCurrentIndex(getComboBoxIndexByName(tempWnd->frame));
-    showWndlist();
+    ui->cb_Frame->setCurrentIndex(getComboBoxIndexByName(tempWnd->frame));// signal trigger， auto showWndlist
+//    showWndlist();
 }
 
 void xmlExample::parentExpand(QTreeWidgetItem *item)
