@@ -66,6 +66,8 @@ void xmlExample::searchEveryFrame(QString wndName)
     if (wndName == NULL) return;
 
     Menu_Wnd *tempWnd = pinterface->getWndByName(wndName);
+    if (tempWnd == NULL) return;
+    
     pinterface->setCurframe(tempWnd->frame);
     ui->cb_Frame->setCurrentIndex(getComboBoxIndexByName(tempWnd->frame));// signal trigger， auto showWndlist
 //    showWndlist();

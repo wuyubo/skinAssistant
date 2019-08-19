@@ -1,0 +1,146 @@
+[33mcommit f35b252801c28eb944bbdcce7db4395b6316f0bc[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Mon Jul 15 16:48:44 2019 +0800
+
+    [feature][][] update
+    
+    [what] 上传最新修改
+    [why]  as what
+    [how]  as what
+
+[33mcommit 56bd3d592b840a5e60838fa1ff3798dd3057a1a4[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Wed Dec 26 17:27:04 2018 +0800
+
+    [feature][version] V3.3 to V3.2
+    
+    [what] 3.3与3.2合并为3.2
+    [why]  as what
+    [how]  as what
+
+[33mcommit 367a0d7abdddb013edbf2bc30c48a991e0165465[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Wed Dec 26 17:18:56 2018 +0800
+
+    [feature][release] release V3.3
+    
+    [what] 修复每次重新打开xml都需要，重新打开应用的问题
+    [why]  as what
+    [how]  as what
+
+[33mcommit 6697ea19b622b17be1d53e3badb4f2fa88ebbc4f[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Wed Dec 26 17:09:24 2018 +0800
+
+    [bugfix][open] fix the reopen function
+    
+    [what] 修复每次重新打开xml都需要，重新打开应用的问题
+    [why]  需要清楚前一个xml的内容
+    [how]  as why
+
+[33mcommit 399b4bc5de474e73e91e7b0a79dc048ea323327b[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Wed Dec 26 16:47:39 2018 +0800
+
+    [feature][release] release V3.2
+    
+    [what] 1. 添加图片管理功能
+           2. 修复打开路径不能保存问题
+    [why]  as what
+    [how]  as what
+
+[33mcommit fab62a54486016dd2be77905ab33b49499209f05[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Wed Dec 5 11:03:25 2018 +0800
+
+    [feature][skintool][UI] show UI
+    
+    [what] 完善UI显示
+    [why]  as what
+    [how]  as what
+
+[33mcommit 326673c406bd972f5cf3d816fe28e9b02d5f49c0[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Fri Nov 2 19:36:25 2018 +0800
+
+    [feature][image] add image reverse
+    
+    [what] 添加图片反转功能
+    [why]  as what
+    [how]  as what
+
+[33mcommit b04b6f7dba249a5936674db65124d8eed01fde3e[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Mon Oct 29 10:18:44 2018 +0800
+
+    [feature] add image clone and xml clean funtion
+    
+    [what]
+    [why]
+    [how]
+
+[33mcommit 12a067213444da6ee77c5ea8c9105c7cebb57da0[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Wed Oct 24 10:52:59 2018 +0800
+
+    [feature][code]
+    
+    [what] 重构代码，优化版本
+    [why]  需要发布稳定版本
+    [how]  整理code把UI与逻辑尽量分开
+
+[33mcommit 4776ef5eb5888d6ed91b47c71951cc0d84960f7b[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Sat Jul 28 16:30:04 2018 +0800
+
+    [feature][skintool][release]  release v1.0
+    
+    [what] release v1.0
+    [why]  as what
+    [how]  as what
+
+[33mcommit 5102d54e558d14974352456083ed7c01437f1ade[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Sat Jul 28 16:20:47 2018 +0800
+
+    [feature][skintool][icon] add icon
+    
+    [what] add icon
+    [why]  as what
+    [how]  as what
+
+[33mcommit c46eaeddc844b528ec7e353651aec805b8276055[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Sat Jul 28 15:53:32 2018 +0800
+
+    [feature][skintool][image] add image show
+    
+    [what] 添加图片显示的功能
+    [why] as what
+    [how] as what
+
+[33mcommit 8b89e0396a84460c530e8b4ea32f3ba6347b9915[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Fri Jul 27 19:42:01 2018 +0800
+
+    [feature][skintool][tool] add feature instert, move, delete
+    
+    [what] 添加功能插入、移动、删除
+    [why]  as what
+    [how]  as what
+
+[33mcommit 8ca3a1d876e34fa67b4c1fc03c362b86c6899fa4[m
+Author: wuyubo <wuyubo@cvte.com>
+Date:   Tue Jul 24 09:30:28 2018 +0800
+
+    [feature][xml][ui]
+    
+    [what] init project
+    [why]  as what
+    [how]  as what
+
+[33mcommit ba95e83ec3b7fdc4832a70396a232ee838712a33[m
+Author: wuyubo <wuyubo_berton@163.com>
+Date:   Tue Jul 24 09:28:01 2018 +0800
+
+    Initial commit
