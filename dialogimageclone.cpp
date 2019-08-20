@@ -30,7 +30,7 @@ void DialogImageClone::on_pushButton_clicked()
 }
 bool DialogImageClone::copyImage(QString sourceImg ,QString toImg)
 {
-    if(!ui->rbn_rev->isChecked())
+    if(ui->rbn_fetch->isCheckable())
     {
         return pinterface->copyFileToPath(sourceImg, toImg, true);
     }
@@ -38,6 +38,13 @@ bool DialogImageClone::copyImage(QString sourceImg ,QString toImg)
     if(ui->rbn_rev->isChecked())
     {
         image = image.mirrored(true, false);
+    }
+    else if(ui->rbn_reduce->isCheckable())
+    {
+        if(image.width() > 30 && image.height() > 30)
+        {
+            image = image.scaled(image.width()*0.7, image.height()*0.7, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        }
     }
     return image.save(toImg);
 }
