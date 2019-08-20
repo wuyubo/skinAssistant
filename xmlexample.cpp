@@ -6,6 +6,7 @@
 #include <QAbstractItemView>
 #include <thread>
 #include "interface.h"
+#include "otherfunction.h"
 
 xmlExample::xmlExample(QWidget *parent) :
   QMainWindow(parent),
@@ -1455,6 +1456,30 @@ int xmlExample::getUIw(int _w, float map_width)
     }
      return (int)_w*map_width;
 }
+#define RcGetOsdNum_X(xpos, map_x)     ((xpos)*map_x)		//  17/24 == 1360/1920
+#define RcGetOsdNum_Y(ypos, map_y)     ((ypos)*map_y)		//  32/45 == 768 /1080
+#define ALIGN_8(_x_)                (((_x_) + 7) & ~7)
+
+void xmlExample::RestTransitionWnd(QDomElement e, float map_width, float map_height)
+{
+    bool ok = false;
+    int xStart = e.attribute("X").toInt(&ok);
+    int yStart = e.attribute("Y").toInt(&ok);
+    int w = e.attribute("Width").toInt(&ok);
+    int h = e.attribute("Height").toInt(&ok);
+    int xEnd = xStart+w;
+    int yEnd = yStart+h;
+
+    xStart = RcGetOsdNum_X(xStart, map_width);
+    yStart = RcGetOsdNum_Y(yStart, map_height);
+    w = RcGetOsdNum_X(xEnd, map_width) - xStart;
+    h = RcGetOsdNum_Y(yEnd, map_height) - yStart;
+
+    e.setAttribute("Width", w);
+    e.setAttribute("Height", h);
+    e.setAttribute("X", xStart);
+    e.setAttribute("Y", yStart);
+}
 
 void xmlExample::ChangeUiSize(int w, int h)
 {
@@ -1482,10 +1507,23 @@ void xmlExample::ChangeUiSize(int w, int h)
             if(node.toElement().tagName() == "GWnd")
             {
                 e = node.toElement ();
-                e.setAttribute("Width", getUIw(e.attribute("Width").toInt(&ok), map_width));
-                e.setAttribute("Height", getUIh(e.attribute("Height").toInt(&ok), map_height));
-                e.setAttribute("XPos", getUIx(e.attribute("XPos").toInt(&ok), map_width));
-                e.setAttribute("YPos", getUIy(e.attribute("YPos").toInt(&ok),map_height));
+                int x = e.attribute("XPos").toInt(&ok);
+                int y = e.attribute("YPos").toInt(&ok);
+                int w = e.attribute("Width").toInt(&ok);
+                int h = e.attribute("Height").toInt(&ok);
+
+                w = RcGetOsdNum_X(x+w, map_width) - RcGetOsdNum_X(x, map_width);
+                h = RcGetOsdNum_Y(y+h, map_height) - RcGetOsdNum_Y(y, map_height);
+                x = RcGetOsdNum_X(x, map_width);
+                y = RcGetOsdNum_Y(y, map_height);
+
+                w = ALIGN_8(w);
+                h = ALIGN_8(h);
+
+                e.setAttribute("Width", w);
+                e.setAttribute("Height", h);
+                e.setAttribute("XPos", x);
+                e.setAttribute("YPos", y);
             }
         }
     }
@@ -1501,10 +1539,7 @@ void xmlExample::ChangeUiSize(int w, int h)
 
                if(e.tagName () == "Position")
                {
-                    e.toElement().setAttribute("X", getUIx(e.toElement().attribute("X").toInt(&ok), map_width));
-                    e.toElement().setAttribute("Y",getUIy(e.toElement().attribute("Y").toInt(&ok),map_height ));
-                    e.toElement().setAttribute("Width",getUIw(e.toElement().attribute("Width").toInt(&ok), map_width));
-                    e.toElement().setAttribute("Height", getUIh(e.toElement().attribute("Height").toInt(&ok), map_height));
+                   RestTransitionWnd(e,map_width, map_height);
                }
            }
            n = n.nextSibling();
@@ -1541,10 +1576,7 @@ void xmlExample::resizeWnd(Menu_Wnd *wnd, float map_width, float map_height)
 
            if(e.tagName () == "Position")
            {
-                e.toElement().setAttribute("X", getUIx(e.toElement().attribute("X").toInt(&ok), map_width));
-                e.toElement().setAttribute("Y",getUIy(e.toElement().attribute("Y").toInt(&ok),map_height ));
-                e.toElement().setAttribute("Width",getUIw(e.toElement().attribute("Width").toInt(&ok), map_width));
-                e.toElement().setAttribute("Height", getUIh(e.toElement().attribute("Height").toInt(&ok), map_height));
+               RestTransitionWnd(e,map_width, map_height);
            }
        }
        n = n.nextSibling();
@@ -1579,4 +1611,10 @@ void xmlExample::on_ptn_resize_clicked()
     DEBUG("=============");
     showtips("UI缩放成功。。。。。！");
 
+}
+
+void xmlExample::on_action_other_triggered()
+{
+    OtherFunction *other  = new OtherFunction();
+    other->show();
 }

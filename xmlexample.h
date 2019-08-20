@@ -57,6 +57,7 @@ public:
   int getUIw(int _w, float map_width);
   void ChangeUiSize(int w, int h);
   void resizeWnd(Menu_Wnd *curWnd, float map_width, float map_height);
+  void RestTransitionWnd(QDomElement e, float map_width, float map_height);
 
   void parentExpand(QTreeWidgetItem *item);
 
@@ -165,7 +166,7 @@ private slots:
     void on_ptn_resize_clicked();
 
     void on_le_fuzzySearch_editingFinished();
-
+    void on_action_other_triggered();
 signals:
     void refreshUI_sig();
 private:

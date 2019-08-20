@@ -1328,6 +1328,7 @@ RIGHT</string>
    <addaction name="imgManager"/>
    <addaction name="separator"/>
    <addaction name="action_refer"/>
+   <addaction name="action_other"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
@@ -1434,6 +1435,11 @@ RIGHT</string>
   <action name="action_refer">
    <property name="text">
     <string>参考</string>
+   </property>
+  </action>
+  <action name="action_other">
+   <property name="text">
+    <string>其他功能</string>
    </property>
   </action>
  </widget>
