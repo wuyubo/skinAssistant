@@ -166,7 +166,13 @@ private slots:
     void on_ptn_resize_clicked();
 
     void on_le_fuzzySearch_editingFinished();
+
     void on_action_other_triggered();
+
+    int getComboBoxIndexByName(QString name);
+
+    void searchEveryFrame(QString wndName);
+
 signals:
     void refreshUI_sig();
 private:

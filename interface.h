@@ -142,6 +142,7 @@ public:
     void setWinTextId(Menu_Wnd *wnd, QString txtID, ITEM_STATUS status);
     ////////////////
     void initCompleter();
+    Menu_Wnd *getWndByName(QString name);
 signals:
 
 public slots:

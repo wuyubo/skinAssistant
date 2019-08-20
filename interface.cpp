@@ -371,6 +371,20 @@ Menu_Wnd * InterFace::getMenu_node(QTreeWidgetItem * item)
     return NULL;
 }
 
+Menu_Wnd * InterFace::getWndByName(QString name)
+{
+    foreach(Menu_Wnd *wnd, menuWndList)
+    {
+        if (wnd->node.toElement().attribute("Name").compare(name) == 0)
+        {
+            return wnd;
+        }
+
+    }
+    qDebug() << "no matched wnd";
+    return NULL;
+}
+
 //////////////////////
 void InterFace::appendMenuWndList(Menu_Wnd * wnd)
 {

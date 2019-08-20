@@ -38,7 +38,16 @@ void xmlExample::on_le_fuzzySearch_editingFinished()
 //    on_ptn_search_clicked();
 
     QString txt = ui->le_fuzzySearch->text();
-    if (txt == NULL) return;
+    if (txt != NULL)
+    {
+        searchEveryFrame(txt);
+    }
+    else
+    {
+        qDebug() << "there is no matched!";
+        return;
+    }
+
     QList<QTreeWidgetItem*> clist = ui->menu_tree->findItems(txt, Qt::MatchContains|Qt::MatchRecursive, 0);
 //    QList<QTreeWidgetItem*> clist = ui->menu_tree->findItems(txt, Qt::MatchExactly|Qt::MatchRecursive, 0);
     foreach(QTreeWidgetItem* item, clist)
@@ -58,6 +67,17 @@ void xmlExample::on_le_fuzzySearch_editingFinished()
     }
 }
 
+void xmlExample::searchEveryFrame(QString wndName)
+{
+    if (wndName == NULL) return;
+
+    Menu_Wnd *tempWnd = pinterface->getWndByName(wndName);
+    if (tempWnd == NULL) return;
+
+    pinterface->setCurframe(tempWnd->frame);
+    ui->cb_Frame->setCurrentIndex(getComboBoxIndexByName(tempWnd->frame));
+}
+
 void xmlExample::parentExpand(QTreeWidgetItem *item)
 {
     if (item->parent() != NULL)
@@ -69,6 +89,15 @@ void xmlExample::parentExpand(QTreeWidgetItem *item)
         }
         parentExpand(pItem);
     }
+}
+
+int xmlExample::getComboBoxIndexByName(QString name)
+{
+    int index;
+    index = ui->cb_Frame->findText(name);
+    if (-1 != index)
+        return index;
+    return 0;
 }
 
 void xmlExample::initCopyNode()
