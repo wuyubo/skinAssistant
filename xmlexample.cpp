@@ -7,7 +7,6 @@
 #include <thread>
 #include "interface.h"
 #include "otherfunction.h"
-
 xmlExample::xmlExample(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::xmlExample)
@@ -46,8 +45,16 @@ void xmlExample::on_le_fuzzySearch_editingFinished()
     {
         qDebug() << item->text(0);
         if (item->parent() != NULL)
+        {
             parentExpand(item);
+        }
         ui->menu_tree->setCurrentItem(item);
+        Menu_Wnd *wnd = pinterface->getMenu_node(item);
+        if(wnd)
+        {
+            showWndAttr(wnd);
+            updateUI();
+        }
     }
 }
 
