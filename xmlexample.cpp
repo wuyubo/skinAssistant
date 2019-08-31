@@ -302,6 +302,7 @@ void xmlExample::showWndAttr(Menu_Wnd *wnd)
     QDomNode n=wnd->node.firstChild();
     bool ok;
     ui->le_name->setText(wnd->node.toElement().attribute("Name"));
+    ui->le_fuzzySearch->setText(ui->le_name->text());
     while (!n.isNull ())
     {
        if (n.isElement ())
